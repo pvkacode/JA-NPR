@@ -1,0 +1,28 @@
+{
+  "npr_sha256": "3939297e9399e0b992f87211610769d87d899de50d56da0204d6cbda2d483a53",
+  "ja_weights": {
+    "ja_attgan_s0": "ddc2c9545da738c9ce4b69ba86b6f4e03dfc940adb3c94928c755a82e2e0a12b",
+    "ja_attgan_s1": "4d10987436841920452caf676409f9a7d7b196a301e436766da3103e59ea97e1",
+    "ja_attgan_s2": "2998ef82efcb87ac8b5237cfe5669fab13ec02513738dc8b97415ece4f17db46",
+    "ja_attgan_sngan_s0": "c9888605be71c2f3dc62ff60947e8d5b5dc74a3afe893e3b322dcb3eb74df98c"
+  },
+  "plain_npr_checkpoint": "not in the JA-NPR zip; not evaluated",
+  "pixels": "existing factorial JPEGs, djpeg -dct int, smooth upsample",
+  "q": "Pillow qvec_of on those files, unchanged",
+  "chroma_half": true,
+  "ja_stages": [
+    "ycc",
+    "y_npr",
+    "chroma_pooled",
+    "chroma_npr_up",
+    "residual",
+    "residual_scaled",
+    "conv1",
+    "bn1",
+    "relu",
+    "maxpool",
+    "layer1",
+    "layer2",
+    "pre_fc"
+  ]
+}

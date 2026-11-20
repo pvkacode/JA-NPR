@@ -26,20 +26,8 @@ New Delhi, India}
 \maketitle
 
 \begin{abstract}
-Neighboring Pixel Relationships (NPR) is a lightweight (1.44M-parameter) detector of CNN-generated
-images that exposes up-sampling traces inside $2{\times}2$ pixel cells. We show that JPEG
-compression breaks it. At quality 95 with 4:2:0 chroma subsampling, the released model scores an
-AUC of 0.233 on AttGAN, ranking fakes as more real than real images. We trace this mainly to chroma
-subsampling, which removes the colour detail that NPR examines and replaces it with interpolation.
-We propose JA-NPR, which keeps NPR's operator and makes the model JPEG-aware. NPR is computed on
-chroma at its stored half resolution, and every batch-norm layer is conditioned on the file's JPEG
-header through separate clean/JPEG statistics and a FiLM modulation, adding 0.05M parameters. We
-compare it with NPR fine-tuned on identical data, using face-grouped splits and pass rules fixed in
-advance. Over three seeds, JA-NPR raises AUC at quality 95 from 0.799 to 0.922, and it is better at
-every tested JPEG setting. Controls show that the compression-aware normalization drives the gain,
-that the gain is not a learning-rate effect, and that it transfers to four or five of seven unseen
-generators (up to +0.37 AUC). Conditioning on the quantization table itself helps clearly only on
-STGAN. We also report the alternatives that failed.
+NPR looks for CNN up-sampling by subtracting, inside every $2{\times}2$ cell, the top-left pixel from the other three. The released 1.44M checkpoint ranks AttGAN faces well on PNG and still does so at JPEG quality 95 if chroma is stored at full resolution. The same files saved 4:2:0 invert the ranking. After decoding, the colour differences inside a cell are the interpolator's, not the generator's.
+JA-NPR leaves that cell operator in place. Luma is still residualized at full resolution. Chroma is average-pooled to $2{\times}2$ and residualized there, on the decoded pixels. Each batch-norm keeps a clean buffer and a JPEG buffer, and a zero-initialized FiLM layer reads a four-number header summary. The extra cost is 50{,}560 parameters. Against an NPR fine-tune that sees the same crops, the same face-disjoint splits, and a pass rule written down before the runs, the three-seed AttGAN mean at Q95 4:2:0 moves from 0.799 to 0.922, and JA-NPR is ahead at every JPEG quality in the table. A constant header vector matches that AttGAN number, so the table entries themselves are not what the training generator is using. A higher learning rate on the old batch-norm scale and shift does not match it either. On seven generators held out of training, the normalization transfers more often than the header values do. The header helps STGAN on both seeds we ran and hurts InfoMaxGAN and S3GAN. Several earlier variants, including a quantization-bin projection and a compression-adversarial head, did not beat the fine-tune.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -48,95 +36,44 @@ Deepfake detection, JPEG compression, neighboring pixel relationships, chroma su
 
 % =====================================================================================
 \section{Introduction}
-Detectors of generated images are usually trained and tested on lossless PNG files. Images
-shared online, however, are almost always JPEG files. Detectors that rely on fine
-high-frequency traces are known to lose accuracy under compression~\cite{wang2020cnndetection,
-frank2020frequency,le2023qad}.
+Most detector papers train and test on PNG. The files people actually pass around are JPEG, and high-frequency cues are known to fall apart once blur or compression is applied~\cite{wang2020cnndetection,frank2020frequency,le2023qad}.
 
-NPR~\cite{tan2024npr} is an attractive base for compression-robust detection. It is small, and it
-generalizes across generators by targeting a single mechanism: the nearest-neighbour or
-transposed-convolution up-sampling layers of CNN generators make pixels inside each $2{\times}2$
-cell correlated. NPR exposes this by subtracting from every pixel the top-left pixel of its cell,
-and classifies the residual with a truncated ResNet~\cite{he2016resnet}.
+NPR~\cite{tan2024npr} is small enough that we could change it and still know what we had changed. CNN up-samplers, nearest-neighbour and transposed convolution, leave the four pixels of a $2{\times}2$ cell too alike. NPR subtracts the top-left pixel of the cell from the others and feeds the residual to a truncated ResNet~\cite{he2016resnet}. Tan et al.\ report that this cue transfers across generators. We take that claim as the reason to start from their checkpoint, not as something we re-tested on clean data.
 
-We find that this mechanism is broken by standard JPEG in a specific way. On AttGAN
-faces the released NPR reaches AUC 0.956 on PNG files. At JPEG quality 95 with the common 4:2:0
-chroma subsampling its AUC falls to 0.233: the decision is \emph{inverted}, not merely weakened.
-At 4:4:4 (no colour subsampling) and the same quality the AUC is still 0.876. The damage is
-therefore mostly caused by how JPEG stores colour, not by quantization alone.
+On AttGAN the released weights are fine on PNG (AUC 0.956). Save the same faces at quality 95 with 4:4:4 chroma and the AUC is still 0.876. Save them 4:2:0 and it falls to 0.233, which means fakes are ranked as more real than reals. Quality 95 is not a heavy quantizer. The drop lines up with chroma subsampling. Quantization is not innocent either: at Q75 the released model is inverted even with 4:4:4 (AUC 0.365).
 
-This observation guides our design. A 4:2:0 file contains no colour detail finer than $2{\times}2$
-pixels. Every colour value that NPR sees inside a cell is invented by the decoder's interpolation.
-In addition, how strongly the brightness relationships are altered depends on the quantization
-table, and the decoder can read that table from the file header. We make three contributions:
-\begin{itemize}
-\item \textbf{Chroma-aligned NPR (CA-NPR).} NPR is applied to luma at full resolution and to chroma
-at half resolution, which matches the 4:2:0 sampling grid. The first convolution is re-expressed
-so that the network starts \emph{exactly} at the released NPR weights.
-\item \textbf{QT-Norm.} Each batch-norm layer keeps separate statistics for files with and without
-a quantization table. It is also modulated by a zero-initialized FiLM~\cite{perez2018film} layer
-driven by a 4-number summary of the file's JPEG header. This adds 50{,}560 parameters.
-\item \textbf{A careful evaluation.} The baseline is NPR fine-tuned with the same data and
-protocol. Splits are grouped by source face, intervals come from a paired cluster bootstrap, and
-the pass rules were fixed before the runs. We test three seeds and a held-out-generator setting,
-check that the header cannot reveal the label, and document the alternatives that failed.
-\item \textbf{Controls that locate the gain.} We test a FiLM fed a constant instead of the header
-(same parameters, no header information), a high learning rate on the existing normalization
-layers, and QT-Norm on the original RGB residual. Together they separate the effects of capacity,
-optimization and header information.
-\end{itemize}
+A 4:2:0 file stores one Cb and one Cr per $2{\times}2$ cell. After a smooth upsample, the other three colour samples in the cell are filled in by the decoder. NPR then treats that fill as if the generator had written it. The luma residual is also changed, by an amount that depends on the quantization table in the header. Those two facts are the whole design.
+
+We keep NPR's cell and make two changes. Chroma-aligned NPR (CA-NPR) residualizes luma at full resolution and chroma after a $2{\times}2$ average pool, which is the grid a 4:2:0 file stores. The first convolution can be rewritten so that, with full-resolution chroma, the network starts at the released weights. The pooled path is the part that actually differs at initialization, and it adds no parameters. QT-Norm gives every batch-norm two running-stat buffers, one for files with a quantization table and one without, and a FiLM map~\cite{perez2018film} from a four-number header vector. The FiLM weights start at zero. The new parameters total 50{,}560.
+
+The baseline is not the released checkpoint. It is that checkpoint fine-tuned on the same clean-plus-JPEG crops. AttGAN is split by source face, intervals are paired cluster bootstraps, and the pass rule was in the code before these runs. Three seeds redraw the split. We also train with SNGAN in the mix and test generators that were never in that mix. The header is checked so that it cannot stand in for the label. Variants that lost are in the paper, not only the one we kept.
+
+Three controls are there to stop a loose reading of the gain. One feeds FiLM a constant vector, same parameter count, no header values. One raises the learning rate on the batch-norm scale and shift that were already in NPR. One puts QT-Norm on the original RGB residual and leaves chroma pooling out. On AttGAN the constant vector matches JA-NPR and the learning-rate control does not. The chroma pool, measured against RGB QT-Norm, is a small and condition-dependent difference.
 
 % =====================================================================================
 \section{Related Work}
-\textbf{Up-sampling artifacts.} Generated-image detectors exploit spectral peaks from up-sampling
-\cite{frank2020frequency}, gradient maps~\cite{tan2023lgrad}, and local pixel
-dependencies~\cite{tan2024npr}. Wang et al.~\cite{wang2020cnndetection} showed that blur and JPEG
-augmentation are needed for robustness. Augmentation alone, however, does not tell the network how
-compression changed the evidence.
+Up-sampling leaves traces that several detectors read directly: spectral peaks~\cite{frank2020frequency}, gradients~\cite{tan2023lgrad}, and the local pixel dependence NPR uses~\cite{tan2024npr}. Wang et al.~\cite{wang2020cnndetection} showed that if blur and JPEG are in the training augmentation, a CNN detector survives them better at test time. That result tells you to train on compressed images. It does not say which part of the JPEG pipeline removed the cue.
 
-\textbf{Compression-robust deepfake detection.} QAD~\cite{le2023qad} aligns features of low- and
-high-quality views. ODDN~\cite{tao2025oddn} and PLADA~\cite{li2025plada} target images compressed
-by social networks, using paired and unpaired compressed data and a compression-adversarial
-objective. These methods build on large backbones. Our goal is different: to make a 1.44M-parameter
-detector JPEG-aware, at negligible cost.
+QAD~\cite{le2023qad} pulls the features of a low-quality view and a high-quality view toward each other. ODDN~\cite{tao2025oddn} and PLADA~\cite{li2025plada} train on images that have been through social-network compression, with paired or unpaired views and an adversarial term that tries to hide the compression from a second head. Those models sit on large backbones. We stay on NPR's trunk and add about 0.05M parameters.
 
-\textbf{Using JPEG side information.} JPEG restoration networks condition on the quality factor or
-the quantization table~\cite{jiang2021fbcnn,ehrlich2020qgac}. Domain-specific batch
-normalization~\cite{chang2019dsbn} separates statistics per domain. FiLM~\cite{perez2018film}
-modulates features with a conditioning vector. We combine these ideas inside NPR's backbone. To our
-knowledge, the quantization table has not previously been used to condition an NPR-style detector.
+Restoration networks already condition on a quality factor or on the quantization table itself~\cite{jiang2021fbcnn,ehrlich2020qgac}. Domain-specific batch-norm stores a separate mean and variance per domain~\cite{chang2019dsbn}. FiLM applies a scale and a shift computed from a side vector~\cite{perez2018film}. QT-Norm is those last two ideas, with the JPEG header as the side vector, inside the NPR batch-norm layers. We have not found a previous NPR detector that reads the table this way. If one exists, our comparison is still against a matched fine-tune of the released NPR weights, not against that other system.
 
-\textbf{How this work differs.} QAD, ODDN and PLADA make detectors robust by learning
-compression-invariant features with large backbones and extra training objectives. We take the
-opposite route. We keep a small detector built on one mechanism, ask \emph{why} that mechanism
-fails under JPEG, and change only the parts the diagnosis points to: the resolution at which chroma
-is examined, and how normalization adapts to compressed files. The contribution is therefore a
-targeted, verifiable modification of NPR (0.05M parameters) together with controls that separate
-its effect from data, capacity and learning-rate effects. It is not a new general-purpose
-compression-robust detector, and we do not compare against such detectors.
+The practical difference from QAD, ODDN and PLADA is the question being asked. Those methods train a large network to ignore compression. We ask why this particular residual fails when chroma is subsampled, then change the resolution at which chroma enters the residual and the statistics the batch-norm uses on a JPEG file. The controls later in the paper put most of the AttGAN gain on the normalization, not on the chroma pool. We do not claim a detector that is robust on every generator, and we do not run the large compression-robust models as baselines.
 
 % =====================================================================================
 \section{Why NPR Fails Under JPEG}
 \label{sec:why}
-JPEG~\cite{wallace1992jpeg} converts RGB to YCbCr. Under 4:2:0 it stores the two chroma planes at
-half resolution, so each $2{\times}2$ cell has a single Cb and a single Cr value. It then quantizes
-the $8{\times}8$ DCT coefficients of each plane, dividing by a quantization table that is stored
-in the file header. When the file is decoded, chroma is interpolated back to full size.
+JPEG~\cite{wallace1992jpeg} converts RGB to YCbCr, then, in the usual 4:2:0 setting, keeps chroma at half the luma resolution. Each $2{\times}2$ cell is left with one Cb value and one Cr value. The $8{\times}8$ DCT coefficients are divided by the quantization table, and that table is stored in the header. On the way back out, chroma is interpolated up to the luma grid.
 
-Let $\dn$ take the top-left pixel of every $2{\times}2$ cell and $\up$ be nearest-neighbour
-up-sampling by 2. NPR's residual is
+NPR's residual uses two operators. $\dn$ keeps the top-left pixel of every $2{\times}2$ cell and $\up$ repeats it across the cell:
 \begin{equation}
 R(x) = x - \up(\dn(x)).
 \end{equation}
-For a 4:2:0 file, the within-cell chroma differences in $R$ are produced entirely by the
-decoder's interpolation filter (Fig.~\ref{fig:chroma}). They carry no information about the generator. We confirmed this
-with a no-training probe on the JPEG-fine-tuned NPR (AttGAN, Q95 4:2:0). Replacing the chroma of
-the decoded image by one value per $2{\times}2$ cell \emph{raises} its AUC from 0.829 to 0.864,
-whereas on PNG input the same operation lowers it from 0.999 to 0.863. The detector therefore uses
-real colour detail when it exists, and is misled by invented detail when it does not. Fig.~\ref{fig:residuals} shows the effect on a real AttGAN fake. At Q95 the overall NPR residual,
-which is dominated by brightness, changes only moderately. In the Cb colour channel, however, much
-of the structure inside $2{\times}2$ cells disappears under 4:2:0, while 4:4:4 at the same quality
-keeps more of it. What remains inside each cell under 4:2:0 comes from the decoder's interpolation.
+On a 4:2:0 decode, the chroma part of $R$ is whatever the interpolator put inside the cell (Fig.~\ref{fig:chroma}). It is a function of neighbouring stored samples. It is not a function of a within-cell colour pattern the generator wrote, because that pattern was never stored.
+
+A probe with no extra training makes the same point. We take NPR after the earlier JPEG fine-tune (protocol P1, Section~\ref{sec:fail}) and, on AttGAN at Q95 4:2:0, replace decoded chroma by a single value in each $2{\times}2$ cell. AUC goes from 0.829 up to 0.864. The same replacement on PNG goes from 0.999 down to 0.863. When the colour detail is real, the detector uses it. When the decoder invented it, throwing it away helps.
+
+Fig.~\ref{fig:residuals} is one AttGAN fake, cropped to $48{\times}48$. The RGB residual, which is mostly luma, still looks like the face after Q95 4:2:0. The Cb residual does not. 4:4:4 at the same quality keeps more of the in-cell colour structure than 4:2:0 does.
 
 \begin{figure}[t]
 \centering
@@ -176,10 +113,7 @@ inside the cell after decoding is created by the decoder's interpolation, not by
 \label{fig:chroma}
 \end{figure}
 
-Because $8$ is a multiple of $2$, the $8{\times}8$ block grid never splits a $2{\times}2$ cell.
-Block-boundary position therefore adds no information beyond what NPR already sees. Luma
-relationships inside a cell are altered by quantization, and how much depends on the table. Hence
-the table is useful side information for interpreting the residual.
+Because $8$ is a multiple of $2$, an $8{\times}8$ JPEG block never cuts through an NPR cell. Feeding the network the block position would not tell it anything the residual does not already see. Quantization still moves the luma samples inside the cell, and the size of that move depends on the table. That is the reason the header is available to the batch-norm, not a claim that the table values turned out to matter on every generator.
 
 % =====================================================================================
 \section{Method: JA-NPR}
@@ -203,9 +137,9 @@ the table is useful side information for interpreting the residual.
 \draw[arr] (hdr.east) -- (film.west);
 \draw[arr] (film.north) -- (net.south);
 \end{tikzpicture}
-\caption{JA-NPR. NPR's $2{\times}2$ residual is computed on the planes and at the resolutions that a
-JPEG file actually stores. Every batch-norm layer is conditioned on the file's quantization
-header.}
+\caption{JA-NPR. NPR's $2{\times}2$ residual is computed on luma at full resolution and on
+$2{\times}2$-averaged chroma, the resolution at which a 4:2:0 file stores colour. Every batch-norm
+layer is conditioned on a four-number summary of the JPEG header.}
 \label{fig:method}
 \end{figure}
 
@@ -215,58 +149,40 @@ Let $T$ be the RGB$\rightarrow$YCbCr transform and $(Y,C)=T(x)$ with $C=(C_b,C_r
 R_Y &= Y - \up(\dn(Y)),\\
 \bar C &= \mathrm{AvgPool}_{2}(C), \qquad R_C = \up\!\left(\bar C - \up(\dn(\bar C))\right),
 \end{align}
-so the chroma residual measures relationships between neighbouring \emph{stored} chroma samples,
-i.e. $2{\times}2$ cells at half resolution, or $4{\times}4$ in the image. The input to the network
-is $[R_Y, R_C]/(255\,s)$ with $s{=}0.226$.
+where $\dn$ and $\up$ are as in Eq.~(1). The pool runs on pixels after decoding, for every file, including PNG and 4:4:4. On a 4:2:0 file the average over a cell is close to the one chroma sample that file stored, so $R_C$ compares neighbouring stored samples. Those neighbours sit on a half-resolution grid, which is a $4{\times}4$ block in the decoded image. There is no within-cell chroma left in $R_C$. On a PNG or a 4:4:4 file the same pool throws away chroma the file actually contained. As in the released NPR code, the residual is scaled by $2/3$ before conv1, which therefore sees $\tfrac{2}{3}[R_Y, R_C]/(255\,s)$. The constant $s{=}0.226$ only sets the input range. The Appendix spells out why.
 
-The NPR residual is linear, and the constant offsets of $T$ cancel. If we replaced $R_C$ by the
-full-resolution chroma residual, the released network could therefore be reproduced exactly by
-re-expressing its first convolution:
+The residual is linear, and the constant offsets inside $T$ cancel when you subtract a cell from itself. If chroma is residualized at full resolution instead of after the pool, the released network can be rewritten as a first convolution in YCbCr:
 \begin{equation}
 W'_{o,k} = s \sum_{c} W_{o,c}\, \frac{[T^{-1}]_{c,k}}{\sigma_c},
 \end{equation}
-where $\sigma_c$ are the ImageNet standard deviations used by NPR. Our implementation checks this
-numerically before every run; the maximum logit difference is $3{\times}10^{-4}$. CA-NPR adds no
-parameters. The only change to the input is that chroma is examined at its stored resolution.
+where $\sigma_c$ are NPR's ImageNet channel scales. The $2/3$ factor sits on both sides and drops out. The derivation is in the Appendix. Before every training run the code checks this full-resolution identity. The largest logit gap we have recorded is $3{\times}10^{-4}$. Eq.~(3) is not that identity. Once chroma is pooled, the network at step zero is already different from the released checkpoint, and the check does not cover it. CA-NPR itself has no new weights.
 
 \subsection{Quantization-table-conditioned normalization}
 From the file header we read a descriptor
 \begin{equation}
 q = \big[\,\mathbb{1}_{\text{JPEG}},\ \tfrac{1}{5}\log(1+\bar Q_Y),\ \tfrac{1}{5}\log(1+\bar Q_C),\ \mathbb{1}_{4:2:0}\,\big],
 \end{equation}
-where $\bar Q_Y,\bar Q_C$ are the mean entries of the luma and chroma quantization tables. For a
-PNG file, $q=\mathbf{0}$. Every batch-norm layer in the stem, layer1 and layer2 is replaced by
+where $\bar Q_Y$ and $\bar Q_C$ are the mean entries of the luma and chroma tables. A PNG has $q=\mathbf{0}$. The last bit is 1 only when Pillow reports sampling code 2, which is 4:2:0. A 4:2:2 file gets the same $q$ as a 4:4:4 file with the same tables. The header cannot tell the network that 4:2:2 is subsampled. We replace each of the 24 batch-norm layers in the stem, layer1 and layer2 by
 \begin{equation}
 \hat h = \gamma\,\frac{h-\mu_d}{\sqrt{\sigma^2_d+\epsilon}}+\beta, \qquad
 h' = \hat h \odot \big(1+g(q)\big) + b(q),
 \end{equation}
-where $d=\mathbb{1}_{\text{JPEG}}$ selects one of two sets of running statistics, both initialized
-from the released model. $[g;b]=Aq+a$ is a linear map whose weights $A,a$ start at zero, so
-training starts from the released NPR. Across the 5{,}056 normalized channels this adds 50{,}560
-parameters, bringing the model from 1.438M to 1.488M parameters. Reading $q$ costs nothing, because
-the decoder parses the header anyway.
+with $d\in\{0,1\}$ picking one of two running-stat buffers, both copied from the released model at the start. In the code, $d$ is chosen once per batch: average $q_1$ over the batch and threshold at 0.5. That is a per-file choice in every run we report, because clean images and their JPEG copies go through in separate passes (Section~\ref{sec:train}) and each test batch is a single condition. Training uses the batch moments and updates the buffer for that $d$. Testing uses the buffer. The map $[g;b]=Aq+a$ is a linear layer per image, and $A$ and $a$ are initialized at zero, so QT-Norm does nothing to the activations on the first forward. There are 5{,}056 normalized channels, which is 50{,}560 new parameters, 1.438M to 1.488M. Parsing $q$ does not add a forward pass. The decoder has already read the header.
 
 \subsection{Training}
-Each training image $x$ is cropped and flipped. A JPEG copy $\tilde x$ is then made with quality
-drawn uniformly from 30--95 and subsampling drawn from \{4:2:0, 4:4:4\}. The loss is
-$\mathcal{L}=\mathrm{BCE}(f(x,\mathbf 0),y)+\mathrm{BCE}(f(\tilde x,q(\tilde x)),y)$. We use Adam,
-with learning rate $2{\times}10^{-5}$ for pretrained weights and $10^{-3}$ for the new FiLM layers,
-batch size 16, and 6 epochs. Every baseline uses the same protocol, so any difference comes from
-the model.
+\label{sec:train}
+A crop of $x$ is flipped, and a JPEG copy $\tilde x$ is encoded with quality drawn uniformly from 30 to 95 and subsampling drawn from \{4:2:0, 4:4:4\}. The loss is the sum of two binary cross-entropies,
+$\mathcal{L}=\mathrm{BCE}(f(x,\mathbf 0),y)+\mathrm{BCE}(f(\tilde x,q(\tilde x)),y)$,
+run as two forwards so the batch-norm domain is not mixed inside a batch. Adam runs for 6 epochs at batch size 16, with learning rate $2{\times}10^{-5}$ on the pretrained weights and $10^{-3}$ on the new FiLM layers. Every trained arm uses this schedule. The fast-BN control (Section~\ref{sec:setup}) changes only the learning rate on its existing batch-norm scale and shift. We call this schedule P2.
 
 % =====================================================================================
 \section{Experimental Setup}
-\textbf{Data.} We use generators from GANGen-Detection~\cite{tan2024npr}: AttGAN
-\cite{he2019attgan} ($256^2$), and BEGAN~\cite{berthelot2017began}, SNGAN~\cite{miyato2018sngan}
-and STGAN~\cite{liu2019stgan} ($128^2$), plus CramerGAN, InfoMaxGAN, MMDGAN, RelGAN and S3GAN,
-which are used only as unseen test sets. Each has 2{,}000 real and 2{,}000 fake PNG images. The
-AttGAN fakes are attribute edits of only 143 source faces, so a random split would leak faces
-between training and test. We therefore split by source face: 3{,}194 training and 806 test images
-(400 real, 406 fake), with no shared faces. Table~\ref{tab:data} lists all generators and their roles.
+\label{sec:setup}
+Images come from GANGen-Detection~\cite{tan2024npr}. AttGAN~\cite{he2019attgan} is $256^2$. BEGAN~\cite{berthelot2017began}, SNGAN~\cite{miyato2018sngan} and STGAN~\cite{liu2019stgan} are $128^2$. CramerGAN, InfoMaxGAN, MMDGAN, RelGAN and S3GAN appear only as unseen tests (Table~\ref{tab:data}). Each generator has 2{,}000 real and 2{,}000 fake images. For the four generators we audited, those files are PNG. AttGAN's fakes are edits of 143 source faces, so a random image split would leak faces into both sides. The split is by face: 3{,}194 train, 806 test (400 real, 406 fake), no shared face.
 
 \begin{table}[t]
 \centering
-\caption{Generators used. Each has 2{,}000 real and 2{,}000 fake PNG images.}
+\caption{Generators used. Each has 2{,}000 real and 2{,}000 fake images.}
 \label{tab:data}
 \setlength{\tabcolsep}{3pt}
 \footnotesize
@@ -283,42 +199,20 @@ CramerGAN, InfoMaxGAN, MMDGAN, RelGAN, S3GAN & -- & unseen test (held-out seed 1
 \end{tabular}
 \end{table}
 
-\textbf{Test conditions.} The test conditions are: the original PNG; JPEG 4:2:0 at Q95, 90, 70, 50
-and 30; JPEG 4:4:4 at Q95 and 75; and JPEG 4:2:2 at Q85. The 4:2:2 format is never used in
-training. All JPEGs are encoded with Pillow.
+Every model sees the PNG, JPEG 4:2:0 at Q95, 90, 70, 50 and 30, JPEG 4:4:4 at Q95 and 75, and JPEG 4:2:2 at Q85. The 4:2:2 quality is never drawn during training. Encoding is Pillow throughout this section. A different encoder would be a different experiment.
 
-\textbf{Arms.} \emph{Released}: the NPR checkpoint published by the authors, trained on
-ProGAN~\cite{tan2024npr}. \emph{Plain}: the same checkpoint fine-tuned with our protocol, the
-strongest fair baseline. \emph{Ablations}: CA-NPR with dual BN statistics only (\emph{ycdsbn}); the
-full JA-NPR; and JA-NPR plus a compression-adversarial head (\emph{CAdv}). \emph{Controls}: JA-NPR
-whose FiLM layers receive a fixed vector instead of $q$ (\emph{const-$q$}, identical parameter
-count); Plain with the $10^{-3}$ learning rate applied to its batch-norm scale and shift
-(\emph{fast-BN}); and QT-Norm on the original RGB residual (\emph{QT-Norm RGB}).
+Released NPR is the authors' ProGAN checkpoint~\cite{tan2024npr}, untouched. Plain is that checkpoint fine-tuned with P2, and it is the baseline a new arm has to beat. The ablations are CA-NPR with two BN buffers and no FiLM (ycdsbn), full JA-NPR, and JA-NPR with a compression-adversarial head (CAdv). The controls are JA-NPR with FiLM's input clamped to a constant (const-$q$, same number of weights), Plain with learning rate $10^{-3}$ on the batch-norm scale and shift (fast-BN), and QT-Norm applied to the RGB residual instead of the chroma-pooled one (QT-Norm RGB).
 
-\textbf{Metrics and statistics.} We report AUC, computed on raw logits, and balanced accuracy at the
-default 0.5 threshold. Confidence intervals (95\%) come from 1{,}000 bootstrap
-resamples~\cite{efron1993bootstrap} that draw whole source faces where file names identify them,
-and single images otherwise. Differences between arms are \emph{paired}: both arms are scored on
-the same resamples.
+AUC is computed on the raw logit. Balanced accuracy uses the default probability cut of 0.5, which is the same as a logit threshold of zero after the usual sigmoid. Intervals are 95\% from 1{,}000 bootstrap draws~\cite{efron1993bootstrap}. A draw resamples whole source faces when the filename identifies a face, and single images when it does not. Arm-to-arm differences use the same draws for both arms.
 
-\textbf{Pre-registered pass rule.} The rule was fixed in the code before any run. A new arm passes
-against Plain if three conditions hold. First, its AUC is clearly higher, meaning the 95\% CI of
-the difference excludes 0, at Q95 and Q90 4:2:0. Second, its balanced accuracy is clearly higher
-under the same two conditions. Third, its AUC is not clearly lower on the original images, at Q70,
-Q50 or Q30 4:2:0, or at Q95 or Q75 4:4:4.
+The pass rule was in the training script before the runs below. Against Plain, a new arm passes only if the paired interval excludes zero in its favour at Q95 and Q90 4:2:0, for both AUC and balanced accuracy, and does not exclude zero against it on PNG, on Q70, Q50 or Q30 4:2:0, or on Q95 or Q75 4:4:4.
 
 % =====================================================================================
 \section{Results}
 \subsection{Main result}
-Table~\ref{tab:main} and Fig.~\ref{fig:curve} summarize three seeds. Each seed changes the
-face-grouped split and the training order. The released model is inverted under 4:2:0 at every
-quality. Fine-tuning recovers part of the loss, but its AUC still falls from 0.799 at Q95 to 0.574
-at Q30. JA-NPR is higher in every column, by 0.06--0.13 AUC across the 4:2:0 qualities, and the gap is
-largest at the two ends of the range (Q95 and Q30). It also wins on 4:2:2, a format never seen in training (0.822$\to$0.891).
-Decisions at the default threshold improve even more: at Q95, balanced accuracy rises from 0.573
-to 0.826 (Table~\ref{tab:bacc}). Fig.~\ref{fig:decomp} separates the total improvement over the base
-paper into the part due to training data (fine-tuning on JPEG copies) and the part due to our
-model change.
+Table~\ref{tab:main} and Fig.~\ref{fig:curve} are three seeds. Each seed rebuilds the face split and reshuffles the training order, so the spread is not just initialization. Released NPR stays below 0.5 at every 4:2:0 quality. The fine-tune climbs back, 0.799 at Q95 in the three-seed mean, then slides to 0.574 at Q30. JA-NPR sits above it in every JPEG column. Along 4:2:0 the gap is roughly six to thirteen points of AUC, wider at Q95 and again at Q30 than in the middle of the range. PNG is saturated for both trained models, which is why the JPEG columns are the comparison. The 4:2:2 column, Q85, was never in the training draw, and the mean still moves from 0.822 to 0.891. Section~\ref{sec:why} already noted that $q$ does not mark 4:2:2 as subsampled, so that column is not a header-detection trick.
+
+The 0.5 threshold tells a harsher story than AUC (Table~\ref{tab:bacc}). Fine-tuned NPR is at 0.573 balanced accuracy at Q95 and 0.499 at Q30. JA-NPR is at 0.826 and 0.617 on those two columns. Fig.~\ref{fig:decomp} splits the distance from the released checkpoint into the part you get by fine-tuning on JPEG copies and the part you get by changing the model, on the same data.
 
 \begin{figure}[t]
 \centering
@@ -378,10 +272,7 @@ NPR + JPEG FT & 0.951 & 0.573 & 0.566 & 0.534 & 0.507 & 0.499 \\
 \end{table}
 
 \subsection{Robustness across seeds}
-Table~\ref{tab:seeds} gives the paired differences for each seed. On all three seeds, JA-NPR's AUC
-is higher than Plain's under all nine test conditions. The strict pre-registered rule is passed
-on seeds 0 and 2. On seed 1 it fails narrowly: the Q90 difference is +0.060, but its interval is
-$[-0.001, +0.114]$. We report this outcome as it occurred and do not change the rule.
+Table~\ref{tab:seeds} is the paired 4:2:0 difference, seed by seed. On every seed, JA-NPR's AUC is higher than Plain's on all nine test conditions, not only the five qualities in the table. The rule we wrote down first passes on seeds 0 and 2. Seed 1 misses it: the Q90 difference is $+0.060$ with interval $[-0.001,+0.114]$, which touches zero. The point estimate is still positive. The interval does not clear the rule, and we did not edit the rule after seeing the table.
 
 \begin{table}[t]
 \centering
@@ -406,24 +297,11 @@ Verdict & PASS & FAIL (Q90) & PASS \\
 \end{table}
 
 \subsection{Ablation and controls}
-Table~\ref{tab:abl} isolates the components on AttGAN (seed 0, same protocol in every row).
-CA-NPR with separate BN statistics but no FiLM (\emph{ycdsbn}) does not beat Plain: it is worse at
-Q70 ($-$0.081, CI $[-0.150,-0.016]$), so it fails the rule. Giving the normalization layers a high
-learning rate alone (\emph{fast-BN}) helps only a little (+0.046 at Q95). JA-NPR is clearly better
-than fast-BN at every JPEG quality (+0.101 at Q95, CI $[+0.051,+0.149]$), so the gain is not an
-optimization effect.
+Table~\ref{tab:abl} is seed 0, one schedule, every row. ycdsbn, which is the chroma pool plus two BN buffers and no FiLM, does not beat Plain. At Q70 it is worse by 0.081, interval $[-0.150,-0.016]$, and it fails the rule. fast-BN, the same fine-tune with a higher learning rate on the existing scale and shift, picks up 0.046 at Q95. JA-NPR is ahead of fast-BN at every JPEG quality in the table, by 0.101 at Q95 with interval $[+0.051,+0.149]$. A larger step size on the old affine is not the gain.
 
-However, on this generator the header \emph{content} does not matter. The const-$q$ control, with
-the same parameters but no header information, is level with JA-NPR (+0.002 at Q95, CI
-$[-0.021,+0.025]$). The gain on the training generator therefore comes from compression-aware
-normalization: separate statistics for clean and JPEG files (selected by the header's JPEG flag),
-together with learnable per-channel modulation. Neither part works alone. QT-Norm on the original
-RGB residual also passes the rule. Against it, CA-NPR is slightly better at Q95 4:2:0 (+0.034, CI
-$[+0.001,+0.066]$) but slightly worse at Q75 4:4:4 ($-$0.028, CI $[-0.052,-0.010]$), so its
-contribution is small and mixed. The compression-adversarial head~\cite{ganin2015dann}, inspired
-by~\cite{tao2025oddn,li2025plada}, adds nothing (+0.002, n.s.). Its adversary reached 0.53
-accuracy in epoch 4 but rose back to 0.998 by the end of training, so the features were never made
-compression-invariant. Fig.~\ref{fig:abl} shows the same comparison graphically.
+On AttGAN the numbers inside $q$ are optional. const-$q$ has the same weights and a fixed input, and at Q95 it is within 0.002 of JA-NPR, interval $[-0.021,+0.025]$. What this generator is using is a JPEG path through the normalization: a second buffer, selected by the JPEG flag, and a learned per-channel scale and shift. We did not get that from either piece in isolation. ycdsbn has the second buffer and failed. fast-BN has a faster affine and no second buffer, and it moved the Q95 number only a little.
+
+QT-Norm on the RGB residual also passes the rule, and at Q70, Q50 and Q30 it is the highest row in Table~\ref{tab:abl}. Against that RGB version, adding the chroma pool changes Q95 4:2:0 by $+0.034$ $[+0.001,+0.066]$ and Q75 4:4:4 by $-0.028$ $[-0.052,-0.010]$. The pool is not the main AttGAN effect, and the sign depends on the test. The compression-adversarial head~\cite{ganin2015dann}, the same idea as in~\cite{tao2025oddn,li2025plada}, adds 0.002 at Q95. The adversary's accuracy fell to 0.53 in epoch 4 and was back at 0.998 at the end, so the trunk did not stay invariant to compression. Fig.~\ref{fig:abl} is the same comparison as a plot.
 
 \begin{figure}[t]
 \centering
@@ -458,14 +336,7 @@ JA-NPR + CAdv & \textbf{0.943} & 0.929 & 0.850 & 0.820 & 0.703 & 1.488M$^\dagger
 \end{table}
 
 \subsection{Generators never seen in training}
-We trained on AttGAN and SNGAN (128-pixel crops) and tested on all 4{,}000 images of STGAN and
-BEGAN (Table~\ref{tab:held}, Fig.~\ref{fig:held}). On STGAN, the fine-tuned NPR is at or below
-chance under every JPEG condition. JA-NPR passes the pre-registered rule there, improving AUC by
-+0.248 at Q95 (CI $[+0.219,+0.280]$) and by +0.159 even at Q30. BEGAN also passes the rule, but
-its absolute AUC at Q95/Q90 stays below 0.5. Its real images carry a hidden $8{\times}8$ JPEG grid
-(Section~\ref{sec:limits}), which may explain why it does better at low quality than at high
-quality. In the single-generator setting (trained on AttGAN only, seed 0), JA-NPR also improves
-Q95 AUC on BEGAN (0.417$\to$0.760) and STGAN (0.344$\to$0.582), but not on SNGAN (0.474$\to$0.501).
+Training on AttGAN and SNGAN, with 128-pixel crops, and testing the full 4{,}000 images of STGAN and BEGAN gives Table~\ref{tab:held} and Fig.~\ref{fig:held}. On STGAN the fine-tune sits at or below 0.5 for every JPEG column. JA-NPR passes the rule there. The Q95 paired gain is $+0.248$ $[+0.219,+0.280]$, and at Q30 it is still $+0.159$. BEGAN also passes the rule on the differences, but the absolute AUC at Q95 and Q90 stays under one half. Those real images were JPEG-compressed before anyone assembled the dataset. Section~\ref{sec:shortcut} is that check. Trained on AttGAN only, seed 0, the same Q95 comparison is 0.417 to 0.760 on BEGAN and 0.344 to 0.582 on STGAN, and 0.474 to 0.501 on SNGAN, which is no real movement.
 
 \begin{table}[t]
 \centering
@@ -494,11 +365,7 @@ Test & Method & PNG & Q95 & Q90 & Q70 & Q50 & Q30 \\
 \end{figure}
 
 \subsection{What the quantization table adds on unseen generators}
-We repeated the held-out experiment with the controls (Table~\ref{tab:ctrl}). On STGAN the header
-content matters. JA-NPR beats the const-$q$ control by +0.117 at Q95 (CI $[+0.103,+0.132]$),
-+0.102 at Q90, +0.065 at Q70 and +0.041 at Q50, and by +0.109 on the unseen 4:2:2 format. It also
-beats it on the seen AttGAN test faces when training covers two generators (+0.058 at Q95, CI
-$[+0.026,+0.094]$). Fast-BN fails the rule on both unseen generators.
+The held-out run with the controls included (Table~\ref{tab:ctrl}) is where the header values show up. On STGAN, JA-NPR beats const-$q$ by 0.117 at Q95, interval $[+0.103,+0.132]$, then by 0.102, 0.065 and 0.041 at Q90, Q70 and Q50, and by 0.109 on the 4:2:2 files it was not trained on. With two generators in training, the same comparison on the seen AttGAN faces is $+0.058$ at Q95, interval $[+0.026,+0.094]$. That is a different training mixture from the AttGAN-only ablation, where const-$q$ matched JA-NPR. fast-BN fails the rule on both unseen generators in this table.
 
 \begin{table}[t]
 \centering
@@ -519,18 +386,11 @@ JA-NPR, const-$q$ (control) & 0.645 & 0.592 & 0.551 & 0.544 & 0.564 \\
 \end{tabular}}
 \end{table}
 
-To test whether this generalizes, we ran a second seed and tested on seven unseen generators: the
-two above plus CramerGAN, InfoMaxGAN, MMDGAN, RelGAN and S3GAN, all 2{,}000 real and 2{,}000 fake
-images each (Table~\ref{tab:seven}). The STGAN result replicates: JA-NPR beats const-$q$ by +0.159
-at Q95 (CI $[+0.140,+0.181]$), and beats the fine-tuned NPR by +0.282 ($0.519\to0.802$). Across
-all seven generators, however, the header effect is not consistent. It is clearly positive on
-STGAN and at Q95 only on BEGAN (where const-$q$ is better at Q90--Q30), small or zero on
-CramerGAN, MMDGAN and RelGAN, and clearly negative on InfoMaxGAN ($-0.117$) and S3GAN ($-0.053$).
-The compression-aware normalization itself transfers more reliably. Against the fine-tuned NPR it
-passes the pre-registered rule on four generators with JA-NPR and on five with const-$q$, with
-gains of up to +0.366 AUC at Q95 (RelGAN, $0.397\to0.762$). On InfoMaxGAN JA-NPR is worse than
-the baseline ($0.629\to0.520$). S3GAN is hard for every arm: even on uncompressed images the
-fine-tuned NPR reaches only 0.650 AUC. Fig.~\ref{fig:seven} shows these results side by side.
+A second seed, same AttGAN+SNGAN training, is scored on seven unseen generators: STGAN, BEGAN, and CramerGAN, InfoMaxGAN, MMDGAN, RelGAN, S3GAN, each with 4{,}000 images (Table~\ref{tab:seven}). STGAN repeats. JA-NPR is 0.159 above const-$q$ at Q95, interval $[+0.140,+0.181]$, and 0.282 above the fine-tune ($0.519$ to $0.802$).
+
+The header effect does not have one sign. It is clearly positive on STGAN. On BEGAN it is positive at Q95 only; const-$q$ is better from Q90 down to Q30. CramerGAN, MMDGAN and RelGAN move by about nothing once you look at the intervals, aside from a small positive CramerGAN interval that still fails the full rule for JA-NPR. InfoMaxGAN and S3GAN go the other way, $-0.117$ and $-0.053$, and both intervals exclude zero.
+
+The normalization, constant input included, travels further than the table values. Against the fine-tune it passes the rule on four of the seven generators with JA-NPR and on five with const-$q$. The largest Q95 jump is RelGAN, 0.397 to 0.762. InfoMaxGAN goes from 0.629 down to 0.520. S3GAN is weak before any JPEG is applied: the fine-tune reaches only 0.650 on the PNGs. Fig.~\ref{fig:seven} puts the Q95 bars next to each other.
 
 \begin{figure}[t]
 \centering
@@ -565,61 +425,24 @@ S3GAN & 0.532 & 0.540 & 0.487 & F / F & $-$0.053 [$-$0.071, $-$0.037] \\
 \end{tabular}}
 \end{table}
 
-\textbf{Why might the header help on some generators and hurt on others?} We did not test the
-following explanations; they are hypotheses. The FiLM layers learn, from AttGAN and SNGAN, how each
-compression setting changes the features of \emph{those} generators' fakes. Where an unseen
-generator's artifacts respond to compression in a similar way (plausibly STGAN, an AttGAN-like
-face-editing model), this learned correction transfers and helps. Where they respond differently
-(InfoMaxGAN, S3GAN), the same correction is applied to the wrong kind of signal and hurts. The
-constant-input control cannot learn a quality-specific correction, which would explain why it is
-less helpful on STGAN but also less harmful elsewhere. Training on more generators, or
-regularizing the FiLM layers, would test this.
+We do not have a test of the following, so it stays a guess. FiLM sees AttGAN and SNGAN and learns how those generators' features move when the header changes. STGAN is also a face editor, and a correction fit on AttGAN may land in the right place. InfoMaxGAN and S3GAN need not move the same way under the same table, and then the same correction is applied to a different residual. const-$q$ cannot make a quality-specific correction, which fits it helping less on STGAN and hurting less on the generators where JA-NPR goes down. Training on a wider set of generators, or shrinking the FiLM weights, would be the experiment. We have not run it.
 
 \subsection{Prior compression as a shortcut}
 \label{sec:shortcut}
-BEGAN's real images were JPEG-compressed before the dataset was assembled. To test whether this
-explains BEGAN's behaviour, we built a control set in which BEGAN's fake images were also
-JPEG-compressed once (Q90) and saved as PNG, with the real images unchanged. Under re-compression
-the results barely changed (JA-NPR at Q95: 0.760 on BEGAN, 0.711 on the control set), so prior
-compression does not explain the JPEG results. On the \emph{uncompressed} control images, however,
-every model labelled the pre-compressed fakes as real. AUC fell from about 1.0 to 0.267 for Plain,
-0.389 for JA-NPR and 0.015 for QT-Norm RGB. NPR-style detectors trained this way therefore
-partly learn the shortcut ``carries old JPEG traces $\Rightarrow$ real''. This is a weakness of
-the training data and protocol that all variants share.
+BEGAN reals were already JPEG images when the dataset was built. To see whether that is why high-quality JPEG AUC stays low, we compressed the fake images once at Q90, saved them as PNG, and left the reals alone. Re-encoding both classes again barely moves the score. JA-NPR trained on AttGAN scores 0.760 on the original BEGAN JPEGs at Q95 and 0.711 on this control. Prior compression of the reals does not explain the JPEG column.
+
+It does explain the PNG column of the control. On those uncompressed files, every model we tried ranks the pre-compressed fakes as more real than the reals. AUC falls from about 1 to 0.267 for Plain, 0.389 for JA-NPR, and 0.015 for QT-Norm RGB. The training has picked up ``old JPEG traces mean real.'' Plain has the same habit. It is the data and the protocol, not a quirk of FiLM.
 
 \subsection{How the method evolved}
-JA-NPR is the result of a sequence of experiments, each prompted by the previous result:
-\begin{enumerate}
-\item \textbf{Diagnosis.} The released NPR is inverted under 4:2:0 JPEG but not under 4:4:4, and
-the colour probe (Section~\ref{sec:why}) shows that decoder-invented chroma misleads it. This
-pointed to chroma subsampling as the main cause.
-\item \textbf{Data-only baseline.} Fine-tuning on JPEG copies recovers much of the loss
-(0.233$\to$0.829 at Q95 under P1), but decisions at the 0.5 threshold stay poor. This became the
-baseline to beat.
-\item \textbf{Front-end and loss ideas failed.} A quantization-constraint clean-up (QC-NPR), a
-feature consistency loss and test-time AdaBN did not beat the baseline (Table~\ref{tab:fail}).
-\item \textbf{Chroma-aligned residual and separate statistics.} Each helped one aspect: ranking
-(+0.076 at Q95) and decisions (balanced accuracy 0.549$\to$0.750). Combined, they gave +0.090 at
-Q95, but lost 0.109 at Q70.
-\item \textbf{Header-conditioned modulation.} Adding FiLM layers driven by the JPEG header and
-training on a wider quality range (Q30--95) removed the trade-off, and the pre-registered test was
-passed (Table~\ref{tab:main}).
-\item \textbf{Controls changed the explanation.} A constant-input FiLM matched JA-NPR on AttGAN,
-while fast-BN did not. So the gain comes from compression-aware normalization, not from the header
-content (Table~\ref{tab:abl}).
-\item \textbf{Generalization tests narrowed the header claim.} The header clearly helps on STGAN
-(two seeds), but across seven unseen generators its effect is mixed, while the normalization
-transfers to most of them (Table~\ref{tab:seven}).
-\end{enumerate}
+The order of experiments is worth writing down, because the explanation changed after the controls.
+
+The released model at Q95 is inverted on 4:2:0 and not on 4:4:4, and the colour probe in Section~\ref{sec:why} says the decoder's chroma is part of the reason. Fine-tuning on JPEG copies, under the earlier P1 schedule, lifts Q95 from 0.233 to 0.829 and still leaves the 0.5 threshold near chance. That fine-tune is the baseline. A projection onto quantization-consistent $2{\times}2$ cells, a feature-consistency loss, and test-time AdaBN did not beat it (Table~\ref{tab:fail}). Under P1 the chroma-aligned residual improved ranking by 0.076 at Q95, and separate BN statistics improved balanced accuracy from 0.549 to 0.750. Together they were $+0.090$ at Q95 and $-0.109$ at Q70. FiLM from the header, trained on qualities from 30 to 95, is what removed that trade-off. The rule then passes on two of the three P2 seeds (Tables~\ref{tab:main} and~\ref{tab:seeds}).
+
+The AttGAN controls changed what we were willing to say. const-$q$ matches JA-NPR. fast-BN does not. On this generator the gain is the JPEG path in the normalization, not the particular table means (Table~\ref{tab:abl}). The header claim only comes back on unseen generators, and only on some of them: STGAN on two seeds, mixed signs on the other six (Table~\ref{tab:seven}).
 
 \subsection{Alternatives that failed}
-Table~\ref{tab:fail} lists the other methods we tested before arriving at JA-NPR. P1 denotes an
-earlier protocol (JPEG Q75--95, 4:2:0 only), under which the fine-tuned baseline reaches 0.829 at
-Q95. QC-NPR projects the decoded image onto images that are both constant within $2{\times}2$
-cells and consistent with the quantization intervals; this removes too much signal. The feature
-consistency loss did not change the predictions. Test-time AdaBN~\cite{li2018adabn} on the
-released model did not recover 4:2:0 ranking. Under P1, CA-NPR with dual BN gave +0.090 at Q95 but
-lost 0.109 at Q70. This trade-off motivated adding the FiLM modulation, which removed it.
+\label{sec:fail}
+Table~\ref{tab:fail} is the rest of what we tried before settling on JA-NPR. P1 is the earlier schedule, JPEG qualities 75 to 95 and 4:2:0 only. P2 is Section~\ref{sec:train}. Under P1 the fine-tune is at 0.829 at Q95, so the deltas below are against that number, not against Table~\ref{tab:main}. QC-NPR forces the decoded image onto $2{\times}2$-constant images that sit inside the quantization bins, and it strips more signal than it repairs. The consistency loss left the predictions where they were. Test-time AdaBN~\cite{li2018adabn} on the released weights moved a 600-image Q95 4:2:0 audit from 0.289 to 0.258, the wrong direction. The P1 trade-off, $+0.090$ at Q95 and $-0.109$ at Q70 for CA-NPR with dual BN, is why the FiLM layer was added. Under P2 that same arm still fails, now by 0.081 at Q70.
 
 \begin{table}[t]
 \centering
@@ -645,56 +468,28 @@ Block-position input & no added signal: $8{\times}8$ blocks never split $2{\time
 \end{table}
 
 \subsection{Can the header reveal the label?}
-QT-Norm reads the file header, so we checked that this does not leak the class. All 16{,}000
-original images, real and fake in all four generators, are PNG files and therefore have
-$q=\mathbf 0$. Under every JPEG condition, real and fake images are re-encoded with identical
-settings and therefore receive identical $q$. The header can tell the network \emph{how} an image
-was compressed, never \emph{which class} it belongs to. We did not check the file format of the five
-extra test generators. Their JPEG results are unaffected, because both classes are re-encoded
-identically, but their uncompressed rows should be read with this in mind.
+QT-Norm reads the header, so we checked that the header is not a label in disguise. The 16{,}000 original images of AttGAN, BEGAN, SNGAN and STGAN are PNG, real and fake, so $q=\mathbf{0}$ for both classes. Every JPEG test re-encodes both classes with the same settings, so they receive the same $q$. The network can see how the file was compressed. It cannot see the class in $q$. We did not audit the file format of the five extra generators. Their JPEG rows are still matched across classes. Their PNG rows are not something we can vouch for.
 
 % =====================================================================================
 \section{Limitations}
 \label{sec:limits}
-\begin{itemize}
-\item \textbf{Scale.} The study is small: nine generators with 4{,}000 images each (two used for training), three seeds in
-the single-generator setting, two seeds in the held-out setting (with seven unseen generators in
-the second), and one seed for the single-generator controls. One of the three single-generator
-seeds misses the strict rule.
-\item \textbf{Dataset biases.} In a dataset audit, BEGAN's real images showed a hidden $8{\times}8$
-JPEG grid ($z{=}{+}8.6$). File-level statistics alone, such as file size, separate STGAN classes
-with AUC 0.954 (BEGAN: 0.829). Our model sees only pixels and $q$, and the baseline had access to
-the same images, so the gains reported here are relative. The absolute STGAN and BEGAN numbers
-should nevertheless be read with care.
-\item \textbf{SNGAN.} SNGAN stays close to chance under JPEG even when it is in the training set.
-For this generator the NPR trace seems largely destroyed by compression.
-\item \textbf{Calibration.} Calibration drifts at low quality. In the held-out run on AttGAN at
-Q50, only 11\% of real images are accepted at the 0.5 threshold, even though the AUC is 0.720.
-\item \textbf{Header value.} On the training generator the quantization-table content adds
-nothing over a constant input. On unseen generators it helps clearly on STGAN (two seeds), is
-neutral on three generators and hurts on InfoMaxGAN and S3GAN. CA-NPR's contribution is small and
-condition-dependent.
-\item \textbf{Unseen generators.} Even the normalization fails on InfoMaxGAN and S3GAN, so
-JA-NPR does not solve cross-generator detection under JPEG.
-\item \textbf{Shortcut.} The models partly treat traces of earlier JPEG compression as evidence of
-a real image (Section~\ref{sec:shortcut}).
-\item \textbf{Untested settings.} Only Pillow's JPEG encoder and single compression were tested.
-For a re-compressed file, the header describes only the last compression.
-\end{itemize}
+Nine generators, 4{,}000 images each, and training on AttGAN, or on AttGAN plus SNGAN in the held-out runs. The single-generator result is three seeds, and one of them misses the rule on Q90. The held-out header comparison is two seeds, the second of which covers the seven unseen sets. The AttGAN-only controls are one seed. That is enough to see the pattern and not enough to treat the seed-1 miss as noise we can ignore.
+
+A 300-image audit finds an $8{\times}8$ JPEG grid in BEGAN reals and not in BEGAN fakes ($z{=}{+}8.6$ on a block-boundary statistic). File size and related metadata separate STGAN classes at AUC 0.954 and BEGAN at 0.829, without looking at pixels. On AttGAN, the set the main table uses, the same metadata probe is 0.578, and the block statistic points the other way, fakes higher, $z{=}{-}4.3$. JA-NPR and Plain see the same pixels and, when both are trained, the same images. The gaps between them are relative. Absolute STGAN and BEGAN AUCs should be read next to those audits.
+
+SNGAN stays near 0.5 under JPEG even when it is in the training set. For that generator the NPR trace does not seem to survive compression in a form either model can rank. Calibration is a separate failure. In the held-out AttGAN run at Q50, AUC is 0.720 and only 11\% of real images are accepted at the 0.5 cut.
+
+When the training set is AttGAN alone, swapping the header vector for a constant does not change the AttGAN number. With AttGAN and SNGAN both in training, the same swap costs 0.058 on AttGAN and a large, repeated amount on STGAN, and it costs the wrong sign on InfoMaxGAN and S3GAN. We have not measured whether the residual itself is less sensitive to subsampling after training. The AUC can move because later layers compensate for an input effect that is still there. The chroma pool's own share, against RGB QT-Norm, is small and changes sign with the test condition.
+
+InfoMaxGAN and S3GAN fail the rule for the normalization as well as for the header. JA-NPR is not a cross-generator JPEG detector. Section~\ref{sec:shortcut} is the prior-compression shortcut, and it is shared. We only used Pillow, and only one encode. If a file is compressed twice, $q$ describes the last table.
 
 % =====================================================================================
 \section{Conclusion}
-NPR's up-sampling evidence fails under JPEG, partly because 4:2:0 files contain no $2{\times}2$
-colour detail and the decoder invents it. JA-NPR keeps NPR's operator and makes its normalization
-compression-aware: the file header selects separate statistics for clean and JPEG files, and a
-FiLM layer conditioned on the quantization table modulates the features. At a cost of 0.05M
-parameters, it is better than NPR fine-tuned with the same data at every tested JPEG setting.
-Controls show that the compression-aware normalization drives the gain. It also transfers to most
-unseen generators: four or five of seven pass the pre-registered test, with up to +0.37 AUC. The
-quantization-table content itself helps only on some generators (clearly on STGAN, on two seeds)
-and should be regarded as an optional component. Future work: understanding when the table helps,
-more seeds and generators, training that removes the prior-compression shortcut, double
-compression, and calibration at low quality.
+The released NPR checkpoint does not fade evenly under JPEG. At quality 95 the AttGAN ranking survives 4:4:4 and inverts under 4:2:0, which is what you would expect if the detector were reading colour differences the decoder had filled in. JA-NPR keeps the $2{\times}2$ residual. It computes the chroma part after a $2{\times}2$ average of the decoded pixels, and it gives batch-norm a clean buffer, a JPEG buffer, and a FiLM layer on a four-number header. That is 0.05M parameters on top of the NPR trunk.
+
+On AttGAN, with a fine-tune that saw the same images, the JPEG columns all move in JA-NPR's favour, including qualities and a 4:2:2 test that the pass rule was not written around. The constant-input control says the AttGAN movement is the normalization path, not the table entries and not the learning rate. The chroma pool is a smaller, signed difference once QT-Norm is already on the RGB residual. Held-out generators split the story. The normalization passes our rule on four of seven, five if the header is clamped, with RelGAN the large positive case and InfoMaxGAN a clear loss. The table values themselves help STGAN on both seeds and hurt two other generators.
+
+What is still open is narrower than ``robust detection.'' We do not know when a header-conditioned FiLM transfers, the seed count is small, the prior-compression shortcut is still in every trained arm, and we have not tried a second encode or a second compressor. Low-quality AUC and the 0.5 threshold are already different measurements on the held-out AttGAN run.
 
 \section*{Code and Data Availability}
 Code, run logs, result CSVs and trained weights: \url{https://github.com/pvkacode/JA-NPR}.
@@ -719,8 +514,10 @@ which is Eq.~(4). The identity holds for any spatial kernel, stride and zero pad
 $s$ cancels, so it only sets the numerical range of the input. We checked it with random images
 and filters independently of our training code. The two sides agree to a relative error of about
 $5{\times}10^{-7}$, which matches the 6-digit rounding of the standard's colour coefficients
-($\|T^{-1}T-I\|_{\max}\approx 6{\times}10^{-7}$). CA-NPR then changes only one thing: the chroma
-residual is computed at half resolution (Eq.~(3)) instead of at full resolution.
+($\|T^{-1}T-I\|_{\max}\approx 6{\times}10^{-7}$). The common factor $2/3$ that NPR applies before conv1
+multiplies both sides and is omitted. CA-NPR then changes only one thing: the chroma residual is
+computed at half resolution (Eq.~(3)) instead of at full resolution. Neither the identity nor our
+numerical check of it covers that pooled path.
 
 \bibliographystyle{IEEEtran}
 \bibliography{refs}
