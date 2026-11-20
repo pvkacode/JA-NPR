@@ -106,6 +106,15 @@ normalization~\cite{chang2019dsbn} separates statistics per domain. FiLM~\cite{p
 modulates features with a conditioning vector. We combine these ideas inside NPR's backbone. To our
 knowledge, the quantization table has not previously been used to condition an NPR-style detector.
 
+\textbf{How this work differs.} QAD, ODDN and PLADA make detectors robust by learning
+compression-invariant features with large backbones and extra training objectives. We take the
+opposite route. We keep a small detector built on one mechanism, ask \emph{why} that mechanism
+fails under JPEG, and change only the parts the diagnosis points to: the resolution at which chroma
+is examined, and how normalization adapts to compressed files. The contribution is therefore a
+targeted, verifiable modification of NPR (0.05M parameters) together with controls that separate
+its effect from data, capacity and learning-rate effects. It is not a new general-purpose
+compression-robust detector, and we do not compare against such detectors.
+
 % =====================================================================================
 \section{Why NPR Fails Under JPEG}
 \label{sec:why}
@@ -556,6 +565,16 @@ S3GAN & 0.532 & 0.540 & 0.487 & F / F & $-$0.053 [$-$0.071, $-$0.037] \\
 \end{tabular}}
 \end{table}
 
+\textbf{Why might the header help on some generators and hurt on others?} We did not test the
+following explanations; they are hypotheses. The FiLM layers learn, from AttGAN and SNGAN, how each
+compression setting changes the features of \emph{those} generators' fakes. Where an unseen
+generator's artifacts respond to compression in a similar way (plausibly STGAN, an AttGAN-like
+face-editing model), this learned correction transfers and helps. Where they respond differently
+(InfoMaxGAN, S3GAN), the same correction is applied to the wrong kind of signal and hurts. The
+constant-input control cannot learn a quality-specific correction, which would explain why it is
+less helpful on STGAN but also less harmful elsewhere. Training on more generators, or
+regularizing the FiLM layers, would test this.
+
 \subsection{Prior compression as a shortcut}
 \label{sec:shortcut}
 BEGAN's real images were JPEG-compressed before the dataset was assembled. To test whether this
@@ -679,6 +698,29 @@ compression, and calibration at low quality.
 
 \section*{Code and Data Availability}
 Code, run logs, result CSVs and trained weights: \url{https://github.com/pvkacode/JA-NPR}.
+
+\appendix
+\section*{Appendix: Exactness of the first-layer re-expression}
+NPR normalizes each RGB channel as $x^n_c=(x_c/255-\mu_c)/\sigma_c$, and its residual is
+$R^{rgb}_c=x^n_c-\mathcal{U}(\mathcal{D}(x^n_c))$. The operator $\mathcal{U}\mathcal{D}$ is linear
+and maps constants to themselves, so $\mu_c$ cancels and $R^{rgb}_c=(x_c-\mathcal{U}\mathcal{D}x_c)
+/(255\,\sigma_c)$. JPEG's colour transform is affine, $y=Tx+o$, so $x=T^{-1}(y-o)$. The offset $o$
+cancels in the residual in the same way, giving
+\begin{equation}
+R^{rgb}_c=\frac{1}{255\,\sigma_c}\sum_k [T^{-1}]_{c,k}\,R^{ycc}_k,\qquad
+R^{ycc}_k=y_k-\mathcal{U}\mathcal{D}y_k .
+\end{equation}
+A convolution with weights $W_{o,c}$ is linear in its input channels, so
+\begin{equation}
+\sum_c W_{o,c}*R^{rgb}_c=\sum_k W'_{o,k}*\frac{R^{ycc}_k}{255\,s},\qquad
+W'_{o,k}=s\sum_c W_{o,c}\frac{[T^{-1}]_{c,k}}{\sigma_c},
+\end{equation}
+which is Eq.~(4). The identity holds for any spatial kernel, stride and zero padding, and the scale
+$s$ cancels, so it only sets the numerical range of the input. We checked it with random images
+and filters independently of our training code. The two sides agree to a relative error of about
+$5{\times}10^{-7}$, which matches the 6-digit rounding of the standard's colour coefficients
+($\|T^{-1}T-I\|_{\max}\approx 6{\times}10^{-7}$). CA-NPR then changes only one thing: the chroma
+residual is computed at half resolution (Eq.~(3)) instead of at full resolution.
 
 \bibliographystyle{IEEEtran}
 \bibliography{refs}
