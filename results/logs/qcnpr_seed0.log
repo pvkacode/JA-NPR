@@ -1,0 +1,97 @@
+qcnpr_colab v1 | device cuda
+self-check 4:4:4: up-sampled image, 2x2 residual after JPEG Q90 = 4.903, after QC = 0.005  (QC should be far smaller)
+self-check 4:2:0: up-sampled image, 2x2 residual after JPEG Q90 = 7.429, after QC = 0.000  (QC should be far smaller)
+self-check passed: tables match Pillow, QC cleans an up-sampled JPEG, PNG input is unchanged
+
+train 3194  test 806  faces shared by train and test: 0
+
+== frozen plain | AttGAN ==
+  orig     AUC 0.956 [0.935, 0.972]  TPR 0.611  TNR 0.993
+  Q95_420  AUC 0.233 [0.167, 0.308]  TPR 0.005  TNR 1.000
+  Q90_420  AUC 0.245 [0.173, 0.325]  TPR 0.002  TNR 1.000
+  Q70_420  AUC 0.330 [0.242, 0.418]  TPR 0.000  TNR 1.000
+  Q50_420  AUC 0.323 [0.243, 0.405]  TPR 0.000  TNR 1.000
+  Q95_444  AUC 0.876 [0.826, 0.922]  TPR 0.002  TNR 1.000
+  Q75_444  AUC 0.365 [0.290, 0.435]  TPR 0.000  TNR 1.000
+== frozen QC | AttGAN ==
+  orig     AUC 0.956 [0.935, 0.972]  TPR 0.611  TNR 0.993
+  Q95_420  AUC 0.562 [0.464, 0.665]  TPR 0.000  TNR 1.000
+  Q90_420  AUC 0.546 [0.447, 0.650]  TPR 0.000  TNR 1.000
+  Q70_420  AUC 0.551 [0.462, 0.648]  TPR 0.000  TNR 1.000
+  Q50_420  AUC 0.554 [0.475, 0.641]  TPR 0.000  TNR 1.000
+  Q95_444  AUC 0.620 [0.532, 0.695]  TPR 0.000  TNR 1.000
+  Q75_444  AUC 0.597 [0.513, 0.683]  TPR 0.000  TNR 1.000
+
+PROBE (no training): does QC input help the released model?
+  condition         frozen plain          frozen QC   difference [95% CI, whole faces resampled]
+  orig                   0.956              0.956   +0.000 [+0.000, +0.000]  no clear difference
+  Q95_420                0.233              0.562   +0.329 [+0.220, +0.430]  better
+  Q90_420                0.245              0.546   +0.301 [+0.186, +0.407]  better
+  Q70_420                0.330              0.551   +0.221 [+0.093, +0.345]  better
+  Q50_420                0.323              0.554   +0.231 [+0.112, +0.340]  better
+  Q95_444                0.876              0.620   -0.256 [-0.376, -0.149]  worse
+  Q75_444                0.365              0.597   +0.232 [+0.127, +0.342]  better
+
+How to read the probe: the 4:4:4 rows are the fair ones. At 4:2:0 QC removes all colour from the
+residual, which the released weights have never seen, so 4:2:0 rows can only be judged after training.
+
+
+wrote /content/qcnpr_results.csv
+
+[11]
+17m
+!python /content/qcnpr_colab.py train
+qcnpr_colab v1 | device cuda
+self-check 4:4:4: up-sampled image, 2x2 residual after JPEG Q90 = 4.903, after QC = 0.005  (QC should be far smaller)
+self-check 4:2:0: up-sampled image, 2x2 residual after JPEG Q90 = 7.429, after QC = 0.000  (QC should be far smaller)
+self-check passed: tables match Pillow, QC cleans an up-sampled JPEG, PNG input is unchanged
+
+train 3194  test 806  faces shared by train and test: 0
+
+training: plain JPEG fine-tune
+  epoch 1/6  loss 6.5068  54s
+  epoch 2/6  loss 3.6239  57s
+  epoch 3/6  loss 2.4737  56s
+  epoch 4/6  loss 1.8518  57s
+  epoch 5/6  loss 1.4886  56s
+  epoch 6/6  loss 1.2396  56s
+== plain JPEG fine-tune | AttGAN ==
+  orig     AUC 0.999 [0.998, 1.000]  TPR 0.995  TNR 0.902
+  Q95_420  AUC 0.829 [0.781, 0.874]  TPR 0.106  TNR 0.993
+  Q90_420  AUC 0.826 [0.774, 0.872]  TPR 0.106  TNR 0.990
+  Q70_420  AUC 0.775 [0.712, 0.833]  TPR 0.049  TNR 0.993
+  Q50_420  AUC 0.667 [0.598, 0.732]  TPR 0.005  TNR 0.995
+  Q95_444  AUC 0.993 [0.988, 0.997]  TPR 0.564  TNR 1.000
+  Q75_444  AUC 0.671 [0.598, 0.742]  TPR 0.000  TNR 1.000
+training: QC-NPR fine-tune
+  epoch 1/6  loss 3.9619  86s
+  epoch 2/6  loss 2.7453  86s
+  epoch 3/6  loss 2.1464  86s
+  epoch 4/6  loss 1.6724  86s
+  epoch 5/6  loss 1.4767  86s
+  epoch 6/6  loss 1.2123  86s
+== QC-NPR fine-tune | AttGAN ==
+  orig     AUC 1.000 [1.000, 1.000]  TPR 0.424  TNR 1.000
+  Q95_420  AUC 0.693 [0.620, 0.763]  TPR 0.000  TNR 1.000
+  Q90_420  AUC 0.688 [0.605, 0.763]  TPR 0.000  TNR 1.000
+  Q70_420  AUC 0.658 [0.572, 0.734]  TPR 0.000  TNR 1.000
+  Q50_420  AUC 0.670 [0.582, 0.746]  TPR 0.000  TNR 1.000
+  Q95_444  AUC 0.615 [0.521, 0.697]  TPR 0.000  TNR 1.000
+  Q75_444  AUC 0.680 [0.598, 0.752]  TPR 0.000  TNR 1.000
+
+RESULT: QC-NPR against the plain JPEG fine-tune (same data, same settings)
+  condition   plain JPEG fine-tune   QC-NPR fine-tune   difference [95% CI, whole faces resampled]
+  orig                   0.999              1.000   +0.001 [+0.000, +0.002]  better
+  Q95_420                0.829              0.693   -0.136 [-0.196, -0.080]  worse
+  Q90_420                0.826              0.688   -0.139 [-0.201, -0.083]  worse
+  Q70_420                0.775              0.658   -0.117 [-0.195, -0.044]  worse
+  Q50_420                0.667              0.670   +0.003 [-0.073, +0.076]  no clear difference
+  Q95_444                0.993              0.615   -0.378 [-0.474, -0.295]  worse
+  Q75_444                0.671              0.680   +0.009 [-0.073, +0.092]  no clear difference
+
+QC-NPR is clearly better on 1 of 7 conditions.
+Anchor: the plain fine-tune should be near AUC 0.83 at Q95_420 (the teammate's result).
+Pass: QC-NPR 'better' on the 4:2:0 rows, and not 'worse' on orig.
+Fail: 'no clear difference' or 'worse' on the 4:2:0 rows. Then the method adds nothing over the data change.
+
+wrote /content/qcnpr_results.csv

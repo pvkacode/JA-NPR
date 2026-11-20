@@ -1,0 +1,448 @@
+npr_t3_colab t3 | device cuda
+self-check passed: every arm starts exactly at the released NPR (before training)
+self-check: header reading  Q95 4:2:0 -> [1.0, 0.38, 0.45, 1.0]   Q30 4:4:4 -> [1.0, 0.91, 0.99, 0.0]
+
+AttGAN: train 3194  test 806  groups shared by train and test: 0
+  AttGAN resampling 0_real: by face id, 1_fake: by face id
+BEGAN: 4000 images, never used in training
+  BEGAN resampling 0_real: by face id, 1_fake: per image
+SNGAN: 4000 images, never used in training
+  SNGAN resampling 0_real: by face id, 1_fake: per image
+STGAN: 4000 images, never used in training
+  STGAN resampling 0_real: by face id, 1_fake: by face id
+  note: BEGAN's real images already carry a JPEG 8x8 grid; read BEGAN rows with care.
+mode single | training images 3194 | crop 224 | JPEG quality 30-95, subsampling 2,0 | seed 0
+
+scoring (no training): released  [1.438M parameters used at test time]
+== released | AttGAN (seen in training) ==
+  orig     AUC 0.956 [0.933, 0.971]  at 0.5: bal.acc 0.802 (fakes caught 0.611, reals passed 0.993)
+  Q95_420  AUC 0.233 [0.168, 0.306]  at 0.5: bal.acc 0.502 (fakes caught 0.005, reals passed 1.000)
+  Q90_420  AUC 0.245 [0.172, 0.314]  at 0.5: bal.acc 0.501 (fakes caught 0.002, reals passed 1.000)
+  Q70_420  AUC 0.330 [0.241, 0.423]  at 0.5: bal.acc 0.500 (fakes caught 0.000, reals passed 1.000)
+  Q50_420  AUC 0.323 [0.247, 0.414]  at 0.5: bal.acc 0.500 (fakes caught 0.000, reals passed 1.000)
+  Q30_420  AUC 0.379 [0.295, 0.477]  at 0.5: bal.acc 0.500 (fakes caught 0.000, reals passed 1.000)
+  Q95_444  AUC 0.876 [0.824, 0.917]  at 0.5: bal.acc 0.501 (fakes caught 0.002, reals passed 1.000)
+  Q75_444  AUC 0.365 [0.291, 0.433]  at 0.5: bal.acc 0.500 (fakes caught 0.000, reals passed 1.000)
+  Q85_422  AUC 0.317 [0.247, 0.383]  at 0.5: bal.acc 0.501 (fakes caught 0.002, reals passed 1.000)
+== released | BEGAN (never seen) ==
+  orig     AUC 1.000 [1.000, 1.000]  at 0.5: bal.acc 0.990 (fakes caught 1.000, reals passed 0.980)
+  Q95_420  AUC 0.082 [0.074, 0.091]  at 0.5: bal.acc 0.497 (fakes caught 0.000, reals passed 0.994)
+  Q90_420  AUC 0.034 [0.030, 0.039]  at 0.5: bal.acc 0.489 (fakes caught 0.000, reals passed 0.978)
+  Q70_420  AUC 0.099 [0.090, 0.108]  at 0.5: bal.acc 0.498 (fakes caught 0.000, reals passed 0.996)
+  Q50_420  AUC 0.114 [0.105, 0.123]  at 0.5: bal.acc 0.499 (fakes caught 0.000, reals passed 0.999)
+== released | SNGAN (never seen) ==
+  orig     AUC 0.985 [0.981, 0.988]  at 0.5: bal.acc 0.888 (fakes caught 0.803, reals passed 0.974)
+  Q95_420  AUC 0.487 [0.471, 0.502]  at 0.5: bal.acc 0.501 (fakes caught 0.011, reals passed 0.992)
+  Q90_420  AUC 0.481 [0.464, 0.497]  at 0.5: bal.acc 0.499 (fakes caught 0.005, reals passed 0.993)
+  Q70_420  AUC 0.483 [0.465, 0.501]  at 0.5: bal.acc 0.500 (fakes caught 0.004, reals passed 0.996)
+  Q50_420  AUC 0.478 [0.462, 0.495]  at 0.5: bal.acc 0.499 (fakes caught 0.001, reals passed 0.998)
+== released | STGAN (never seen) ==
+  orig     AUC 1.000 [1.000, 1.000]  at 0.5: bal.acc 0.980 (fakes caught 0.960, reals passed 1.000)
+  Q95_420  AUC 0.427 [0.395, 0.461]  at 0.5: bal.acc 0.497 (fakes caught 0.004, reals passed 0.991)
+  Q90_420  AUC 0.415 [0.384, 0.448]  at 0.5: bal.acc 0.498 (fakes caught 0.004, reals passed 0.992)
+  Q70_420  AUC 0.421 [0.390, 0.453]  at 0.5: bal.acc 0.501 (fakes caught 0.005, reals passed 0.997)
+  Q50_420  AUC 0.414 [0.386, 0.442]  at 0.5: bal.acc 0.500 (fakes caught 0.001, reals passed 0.999)
+training: plain  [1.438M parameters used at test time]
+  epoch 1/6  loss 7.2817  37s
+  epoch 2/6  loss 4.6329  38s
+  epoch 3/6  loss 3.3452  37s
+  epoch 4/6  loss 2.5487  38s
+  epoch 5/6  loss 1.9536  38s
+  epoch 6/6  loss 1.4969  38s
+== plain | AttGAN (seen in training) ==
+  orig     AUC 1.000 [0.999, 1.000]  at 0.5: bal.acc 0.961 (fakes caught 1.000, reals passed 0.922)
+  Q95_420  AUC 0.794 [0.743, 0.844]  at 0.5: bal.acc 0.564 (fakes caught 0.153, reals passed 0.975)
+  Q90_420  AUC 0.807 [0.754, 0.858]  at 0.5: bal.acc 0.561 (fakes caught 0.138, reals passed 0.985)
+  Q70_420  AUC 0.773 [0.715, 0.830]  at 0.5: bal.acc 0.534 (fakes caught 0.084, reals passed 0.985)
+  Q50_420  AUC 0.683 [0.617, 0.743]  at 0.5: bal.acc 0.501 (fakes caught 0.015, reals passed 0.988)
+  Q30_420  AUC 0.583 [0.511, 0.661]  at 0.5: bal.acc 0.500 (fakes caught 0.002, reals passed 0.998)
+  Q95_444  AUC 0.992 [0.986, 0.997]  at 0.5: bal.acc 0.830 (fakes caught 0.663, reals passed 0.998)
+  Q75_444  AUC 0.817 [0.767, 0.869]  at 0.5: bal.acc 0.525 (fakes caught 0.054, reals passed 0.995)
+  Q85_422  AUC 0.820 [0.775, 0.866]  at 0.5: bal.acc 0.604 (fakes caught 0.251, reals passed 0.958)
+== plain | BEGAN (never seen) ==
+  orig     AUC 1.000 [1.000, 1.000]  at 0.5: bal.acc 0.748 (fakes caught 1.000, reals passed 0.497)
+  Q95_420  AUC 0.417 [0.401, 0.433]  at 0.5: bal.acc 0.430 (fakes caught 0.118, reals passed 0.742)
+  Q90_420  AUC 0.384 [0.365, 0.400]  at 0.5: bal.acc 0.380 (fakes caught 0.121, reals passed 0.638)
+  Q70_420  AUC 0.419 [0.401, 0.436]  at 0.5: bal.acc 0.429 (fakes caught 0.090, reals passed 0.769)
+  Q50_420  AUC 0.425 [0.409, 0.444]  at 0.5: bal.acc 0.465 (fakes caught 0.029, reals passed 0.900)
+== plain | SNGAN (never seen) ==
+  orig     AUC 0.920 [0.913, 0.929]  at 0.5: bal.acc 0.811 (fakes caught 0.698, reals passed 0.923)
+  Q95_420  AUC 0.474 [0.456, 0.490]  at 0.5: bal.acc 0.499 (fakes caught 0.024, reals passed 0.974)
+  Q90_420  AUC 0.468 [0.450, 0.483]  at 0.5: bal.acc 0.490 (fakes caught 0.018, reals passed 0.962)
+  Q70_420  AUC 0.479 [0.461, 0.497]  at 0.5: bal.acc 0.493 (fakes caught 0.033, reals passed 0.954)
+  Q50_420  AUC 0.491 [0.472, 0.508]  at 0.5: bal.acc 0.499 (fakes caught 0.032, reals passed 0.966)
+== plain | STGAN (never seen) ==
+  orig     AUC 0.999 [0.999, 1.000]  at 0.5: bal.acc 0.984 (fakes caught 0.970, reals passed 0.999)
+  Q95_420  AUC 0.344 [0.317, 0.372]  at 0.5: bal.acc 0.496 (fakes caught 0.070, reals passed 0.922)
+  Q90_420  AUC 0.341 [0.311, 0.369]  at 0.5: bal.acc 0.501 (fakes caught 0.066, reals passed 0.937)
+  Q70_420  AUC 0.374 [0.345, 0.401]  at 0.5: bal.acc 0.502 (fakes caught 0.052, reals passed 0.951)
+  Q50_420  AUC 0.381 [0.352, 0.407]  at 0.5: bal.acc 0.499 (fakes caught 0.027, reals passed 0.971)
+training: ycdsbn  [1.438M parameters used at test time]
+  epoch 1/6  loss 10.0988  38s
+  epoch 2/6  loss 6.0233  38s
+  epoch 3/6  loss 4.1060  38s
+  epoch 4/6  loss 3.1467  38s
+  epoch 5/6  loss 2.2229  38s
+  epoch 6/6  loss 1.6539  38s
+== ycdsbn | AttGAN (seen in training) ==
+  orig     AUC 1.000 [1.000, 1.000]  at 0.5: bal.acc 0.998 (fakes caught 0.995, reals passed 1.000)
+  Q95_420  AUC 0.801 [0.736, 0.857]  at 0.5: bal.acc 0.700 (fakes caught 0.621, reals passed 0.780)
+  Q90_420  AUC 0.794 [0.739, 0.848]  at 0.5: bal.acc 0.725 (fakes caught 0.704, reals passed 0.745)
+  Q70_420  AUC 0.692 [0.615, 0.765]  at 0.5: bal.acc 0.645 (fakes caught 0.685, reals passed 0.605)
+  Q50_420  AUC 0.638 [0.562, 0.709]  at 0.5: bal.acc 0.617 (fakes caught 0.589, reals passed 0.645)
+  Q30_420  AUC 0.551 [0.479, 0.627]  at 0.5: bal.acc 0.542 (fakes caught 0.446, reals passed 0.637)
+  Q95_444  AUC 0.979 [0.963, 0.991]  at 0.5: bal.acc 0.910 (fakes caught 0.946, reals passed 0.875)
+  Q75_444  AUC 0.776 [0.711, 0.829]  at 0.5: bal.acc 0.692 (fakes caught 0.633, reals passed 0.750)
+  Q85_422  AUC 0.812 [0.757, 0.853]  at 0.5: bal.acc 0.738 (fakes caught 0.756, reals passed 0.720)
+== ycdsbn | BEGAN (never seen) ==
+  orig     AUC 0.977 [0.972, 0.980]  at 0.5: bal.acc 0.739 (fakes caught 1.000, reals passed 0.477)
+  Q95_420  AUC 0.435 [0.417, 0.451]  at 0.5: bal.acc 0.467 (fakes caught 0.572, reals passed 0.362)
+  Q90_420  AUC 0.406 [0.387, 0.422]  at 0.5: bal.acc 0.457 (fakes caught 0.602, reals passed 0.312)
+  Q70_420  AUC 0.452 [0.435, 0.468]  at 0.5: bal.acc 0.480 (fakes caught 0.606, reals passed 0.354)
+  Q50_420  AUC 0.454 [0.436, 0.471]  at 0.5: bal.acc 0.467 (fakes caught 0.527, reals passed 0.407)
+== ycdsbn | SNGAN (never seen) ==
+  orig     AUC 0.804 [0.790, 0.817]  at 0.5: bal.acc 0.687 (fakes caught 0.435, reals passed 0.940)
+  Q95_420  AUC 0.479 [0.461, 0.496]  at 0.5: bal.acc 0.490 (fakes caught 0.173, reals passed 0.807)
+  Q90_420  AUC 0.478 [0.461, 0.494]  at 0.5: bal.acc 0.485 (fakes caught 0.176, reals passed 0.794)
+  Q70_420  AUC 0.499 [0.482, 0.515]  at 0.5: bal.acc 0.500 (fakes caught 0.277, reals passed 0.724)
+  Q50_420  AUC 0.513 [0.495, 0.532]  at 0.5: bal.acc 0.510 (fakes caught 0.340, reals passed 0.679)
+== ycdsbn | STGAN (never seen) ==
+  orig     AUC 0.947 [0.928, 0.960]  at 0.5: bal.acc 0.855 (fakes caught 0.733, reals passed 0.977)
+  Q95_420  AUC 0.433 [0.399, 0.465]  at 0.5: bal.acc 0.493 (fakes caught 0.272, reals passed 0.715)
+  Q90_420  AUC 0.396 [0.364, 0.425]  at 0.5: bal.acc 0.474 (fakes caught 0.262, reals passed 0.687)
+  Q70_420  AUC 0.354 [0.321, 0.381]  at 0.5: bal.acc 0.433 (fakes caught 0.257, reals passed 0.609)
+  Q50_420  AUC 0.375 [0.349, 0.403]  at 0.5: bal.acc 0.436 (fakes caught 0.265, reals passed 0.608)
+training: janpr_noadv  [1.488M parameters used at test time]
+  epoch 1/6  loss 4.0842  48s
+  epoch 2/6  loss 1.1242  47s
+  epoch 3/6  loss 0.7610  48s
+  epoch 4/6  loss 0.7190  47s
+  epoch 5/6  loss 0.6811  47s
+  epoch 6/6  loss 0.6093  47s
+== janpr_noadv | AttGAN (seen in training) ==
+  orig     AUC 1.000 [1.000, 1.000]  at 0.5: bal.acc 1.000 (fakes caught 1.000, reals passed 1.000)
+  Q95_420  AUC 0.941 [0.917, 0.963]  at 0.5: bal.acc 0.841 (fakes caught 0.970, reals passed 0.713)
+  Q90_420  AUC 0.929 [0.902, 0.953]  at 0.5: bal.acc 0.814 (fakes caught 0.975, reals passed 0.652)
+  Q70_420  AUC 0.849 [0.806, 0.890]  at 0.5: bal.acc 0.748 (fakes caught 0.933, reals passed 0.562)
+  Q50_420  AUC 0.823 [0.776, 0.868]  at 0.5: bal.acc 0.720 (fakes caught 0.933, reals passed 0.507)
+  Q30_420  AUC 0.702 [0.634, 0.765]  at 0.5: bal.acc 0.624 (fakes caught 0.862, reals passed 0.385)
+  Q95_444  AUC 1.000 [1.000, 1.000]  at 0.5: bal.acc 0.995 (fakes caught 0.998, reals passed 0.993)
+  Q75_444  AUC 0.918 [0.890, 0.942]  at 0.5: bal.acc 0.845 (fakes caught 0.884, reals passed 0.805)
+  Q85_422  AUC 0.916 [0.883, 0.943]  at 0.5: bal.acc 0.819 (fakes caught 0.958, reals passed 0.680)
+== janpr_noadv | BEGAN (never seen) ==
+  orig     AUC 1.000 [1.000, 1.000]  at 0.5: bal.acc 0.857 (fakes caught 1.000, reals passed 0.714)
+  Q95_420  AUC 0.760 [0.743, 0.775]  at 0.5: bal.acc 0.580 (fakes caught 0.995, reals passed 0.166)
+  Q90_420  AUC 0.708 [0.692, 0.724]  at 0.5: bal.acc 0.622 (fakes caught 0.989, reals passed 0.255)
+  Q70_420  AUC 0.470 [0.454, 0.488]  at 0.5: bal.acc 0.543 (fakes caught 0.884, reals passed 0.202)
+  Q50_420  AUC 0.495 [0.477, 0.512]  at 0.5: bal.acc 0.531 (fakes caught 0.777, reals passed 0.285)
+== janpr_noadv | SNGAN (never seen) ==
+  orig     AUC 0.936 [0.929, 0.944]  at 0.5: bal.acc 0.797 (fakes caught 0.630, reals passed 0.964)
+  Q95_420  AUC 0.501 [0.486, 0.519]  at 0.5: bal.acc 0.494 (fakes caught 0.205, reals passed 0.783)
+  Q90_420  AUC 0.488 [0.473, 0.505]  at 0.5: bal.acc 0.489 (fakes caught 0.176, reals passed 0.802)
+  Q70_420  AUC 0.502 [0.485, 0.519]  at 0.5: bal.acc 0.500 (fakes caught 0.243, reals passed 0.756)
+  Q50_420  AUC 0.516 [0.500, 0.532]  at 0.5: bal.acc 0.508 (fakes caught 0.284, reals passed 0.733)
+== janpr_noadv | STGAN (never seen) ==
+  orig     AUC 0.997 [0.996, 0.998]  at 0.5: bal.acc 0.941 (fakes caught 0.886, reals passed 0.996)
+  Q95_420  AUC 0.582 [0.547, 0.619]  at 0.5: bal.acc 0.587 (fakes caught 0.358, reals passed 0.815)
+  Q90_420  AUC 0.475 [0.439, 0.512]  at 0.5: bal.acc 0.546 (fakes caught 0.302, reals passed 0.790)
+  Q70_420  AUC 0.398 [0.362, 0.430]  at 0.5: bal.acc 0.499 (fakes caught 0.270, reals passed 0.728)
+  Q50_420  AUC 0.417 [0.385, 0.447]  at 0.5: bal.acc 0.492 (fakes caught 0.264, reals passed 0.721)
+training: janpr  [1.488M parameters used at test time]
+  epoch 1/6  loss 4.5943  48s  adversary accuracy 0.790 (0.5 = features hide compression)
+  epoch 2/6  loss 1.8189  48s  adversary accuracy 0.717 (0.5 = features hide compression)
+  epoch 3/6  loss 1.3934  48s  adversary accuracy 0.693 (0.5 = features hide compression)
+  epoch 4/6  loss 1.6246  48s  adversary accuracy 0.531 (0.5 = features hide compression)
+  epoch 5/6  loss 0.7970  48s  adversary accuracy 0.998 (0.5 = features hide compression)
+  epoch 6/6  loss 0.6547  48s  adversary accuracy 0.998 (0.5 = features hide compression)
+== janpr | AttGAN (seen in training) ==
+  orig     AUC 1.000 [1.000, 1.000]  at 0.5: bal.acc 1.000 (fakes caught 1.000, reals passed 1.000)
+  Q95_420  AUC 0.943 [0.920, 0.965]  at 0.5: bal.acc 0.849 (fakes caught 0.978, reals passed 0.720)
+  Q90_420  AUC 0.929 [0.901, 0.953]  at 0.5: bal.acc 0.821 (fakes caught 0.983, reals passed 0.660)
+  Q70_420  AUC 0.850 [0.810, 0.891]  at 0.5: bal.acc 0.740 (fakes caught 0.946, reals passed 0.535)
+  Q50_420  AUC 0.820 [0.773, 0.864]  at 0.5: bal.acc 0.703 (fakes caught 0.946, reals passed 0.460)
+  Q30_420  AUC 0.703 [0.632, 0.769]  at 0.5: bal.acc 0.631 (fakes caught 0.897, reals passed 0.365)
+  Q95_444  AUC 1.000 [1.000, 1.000]  at 0.5: bal.acc 0.994 (fakes caught 0.995, reals passed 0.993)
+  Q75_444  AUC 0.918 [0.893, 0.943]  at 0.5: bal.acc 0.850 (fakes caught 0.865, reals passed 0.835)
+  Q85_422  AUC 0.914 [0.882, 0.941]  at 0.5: bal.acc 0.818 (fakes caught 0.946, reals passed 0.690)
+== janpr | BEGAN (never seen) ==
+  orig     AUC 1.000 [1.000, 1.000]  at 0.5: bal.acc 0.857 (fakes caught 1.000, reals passed 0.714)
+  Q95_420  AUC 0.719 [0.701, 0.734]  at 0.5: bal.acc 0.579 (fakes caught 0.995, reals passed 0.163)
+  Q90_420  AUC 0.679 [0.662, 0.695]  at 0.5: bal.acc 0.619 (fakes caught 0.983, reals passed 0.255)
+  Q70_420  AUC 0.462 [0.445, 0.480]  at 0.5: bal.acc 0.538 (fakes caught 0.868, reals passed 0.208)
+  Q50_420  AUC 0.492 [0.473, 0.510]  at 0.5: bal.acc 0.528 (fakes caught 0.769, reals passed 0.287)
+== janpr | SNGAN (never seen) ==
+  orig     AUC 0.934 [0.927, 0.942]  at 0.5: bal.acc 0.796 (fakes caught 0.628, reals passed 0.964)
+  Q95_420  AUC 0.501 [0.485, 0.519]  at 0.5: bal.acc 0.494 (fakes caught 0.202, reals passed 0.786)
+  Q90_420  AUC 0.488 [0.472, 0.505]  at 0.5: bal.acc 0.493 (fakes caught 0.177, reals passed 0.808)
+  Q70_420  AUC 0.503 [0.485, 0.520]  at 0.5: bal.acc 0.499 (fakes caught 0.241, reals passed 0.756)
+  Q50_420  AUC 0.515 [0.500, 0.532]  at 0.5: bal.acc 0.508 (fakes caught 0.280, reals passed 0.735)
+== janpr | STGAN (never seen) ==
+  orig     AUC 0.997 [0.995, 0.998]  at 0.5: bal.acc 0.941 (fakes caught 0.885, reals passed 0.996)
+  Q95_420  AUC 0.586 [0.551, 0.624]  at 0.5: bal.acc 0.591 (fakes caught 0.372, reals passed 0.808)
+  Q90_420  AUC 0.480 [0.445, 0.517]  at 0.5: bal.acc 0.553 (fakes caught 0.317, reals passed 0.790)
+  Q70_420  AUC 0.399 [0.364, 0.432]  at 0.5: bal.acc 0.495 (fakes caught 0.271, reals passed 0.720)
+  Q50_420  AUC 0.418 [0.386, 0.447]  at 0.5: bal.acc 0.493 (fakes caught 0.269, reals passed 0.718)
+
+### plain vs released on AttGAN  (information only, no verdict)
+  condition     AUC released        AUC plain             dAUC [95% CI]     bal.acc released      bal.acc plain        d bal.acc [95% CI]
+  orig                 0.956            1.000  +0.044 [+0.029, +0.067]                0.802              0.961  +0.160 [+0.101, +0.215]
+  Q95_420              0.233            0.794  +0.561 [+0.490, +0.626]                0.502              0.564  +0.061 [+0.026, +0.098]
+  Q90_420              0.245            0.807  +0.562 [+0.486, +0.637]                0.501              0.561  +0.060 [+0.029, +0.098]
+  Q70_420              0.330            0.773  +0.443 [+0.353, +0.528]                0.500              0.534  +0.034 [+0.012, +0.064]
+  Q50_420              0.323            0.683  +0.360 [+0.269, +0.448]                0.500              0.501  +0.001 [-0.010, +0.013]
+  Q30_420              0.379            0.583  +0.203 [+0.099, +0.313]                0.500              0.500  -0.000 [-0.004, +0.002]
+  Q95_444              0.876            0.992  +0.116 [+0.076, +0.168]                0.501              0.830  +0.329 [+0.279, +0.376]
+  Q75_444              0.365            0.817  +0.452 [+0.371, +0.528]                0.500              0.525  +0.025 [+0.006, +0.050]
+  Q85_422              0.317            0.820  +0.502 [+0.425, +0.575]                0.501              0.604  +0.103 [+0.067, +0.145]
+
+### ycdsbn vs plain on AttGAN
+Rule (fixed before the run): PASS if, against plain: AUC clearly better on Q95_420 and Q90_420; balanced accuracy at 0.5 clearly better on Q95_420 and Q90_420; and AUC not clearly worse on any of orig, Q70_420, Q50_420, Q30_420, Q95_444, Q75_444.
+  condition        AUC plain       AUC ycdsbn             dAUC [95% CI]        bal.acc plain     bal.acc ycdsbn        d bal.acc [95% CI]
+  orig                 1.000            1.000  +0.000 [+0.000, +0.001]                0.961              0.998  +0.036 [+0.023, +0.050]
+  Q95_420              0.794            0.801  +0.007 [-0.043, +0.063]                0.564              0.700  +0.136 [+0.084, +0.196]
+  Q90_420              0.807            0.794  -0.013 [-0.056, +0.033]                0.561              0.725  +0.163 [+0.104, +0.221]
+  Q70_420              0.773            0.692  -0.081 [-0.150, -0.016]                0.534              0.645  +0.110 [+0.050, +0.164]
+  Q50_420              0.683            0.638  -0.045 [-0.111, +0.017]                0.501              0.617  +0.116 [+0.056, +0.171]
+  Q30_420              0.583            0.551  -0.031 [-0.100, +0.039]                0.500              0.542  +0.042 [-0.021, +0.102]
+  Q95_444              0.992            0.979  -0.013 [-0.026, -0.003]                0.830              0.910  +0.080 [+0.041, +0.121]
+  Q75_444              0.817            0.776  -0.040 [-0.107, +0.025]                0.525              0.692  +0.167 [+0.106, +0.225]
+  Q85_422              0.820            0.812  -0.008 [-0.056, +0.037]                0.604              0.738  +0.134 [+0.087, +0.178]
+VERDICT ycdsbn on AttGAN: FAIL
+
+### janpr_noadv vs plain on AttGAN
+Rule (fixed before the run): PASS if, against plain: AUC clearly better on Q95_420 and Q90_420; balanced accuracy at 0.5 clearly better on Q95_420 and Q90_420; and AUC not clearly worse on any of orig, Q70_420, Q50_420, Q30_420, Q95_444, Q75_444.
+  condition        AUC plain  AUC janpr_noadv             dAUC [95% CI]        bal.acc plain bal.acc janpr_noadv        d bal.acc [95% CI]
+  orig                 1.000            1.000  +0.000 [+0.000, +0.001]                0.961              1.000  +0.039 [+0.026, +0.052]
+  Q95_420              0.794            0.941  +0.147 [+0.094, +0.201]                0.564              0.841  +0.278 [+0.227, +0.318]
+  Q90_420              0.807            0.929  +0.122 [+0.081, +0.167]                0.561              0.814  +0.252 [+0.204, +0.294]
+  Q70_420              0.773            0.849  +0.076 [+0.025, +0.127]                0.534              0.748  +0.214 [+0.173, +0.248]
+  Q50_420              0.683            0.823  +0.140 [+0.087, +0.195]                0.501              0.720  +0.219 [+0.185, +0.253]
+  Q30_420              0.583            0.702  +0.119 [+0.054, +0.187]                0.500              0.624  +0.124 [+0.084, +0.162]
+  Q95_444              0.992            1.000  +0.008 [+0.003, +0.014]                0.830              0.995  +0.165 [+0.116, +0.215]
+  Q75_444              0.817            0.918  +0.101 [+0.059, +0.149]                0.525              0.845  +0.320 [+0.278, +0.360]
+  Q85_422              0.820            0.916  +0.096 [+0.061, +0.129]                0.604              0.819  +0.215 [+0.171, +0.258]
+VERDICT janpr_noadv on AttGAN: PASS
+
+### janpr vs plain on AttGAN
+Rule (fixed before the run): PASS if, against plain: AUC clearly better on Q95_420 and Q90_420; balanced accuracy at 0.5 clearly better on Q95_420 and Q90_420; and AUC not clearly worse on any of orig, Q70_420, Q50_420, Q30_420, Q95_444, Q75_444.
+  condition        AUC plain        AUC janpr             dAUC [95% CI]        bal.acc plain      bal.acc janpr        d bal.acc [95% CI]
+  orig                 1.000            1.000  +0.000 [+0.000, +0.001]                0.961              1.000  +0.039 [+0.026, +0.052]
+  Q95_420              0.794            0.943  +0.149 [+0.097, +0.203]                0.564              0.849  +0.285 [+0.236, +0.326]
+  Q90_420              0.807            0.929  +0.122 [+0.080, +0.168]                0.561              0.821  +0.260 [+0.210, +0.301]
+  Q70_420              0.773            0.850  +0.077 [+0.027, +0.129]                0.534              0.740  +0.206 [+0.162, +0.242]
+  Q50_420              0.683            0.820  +0.137 [+0.083, +0.195]                0.501              0.703  +0.202 [+0.167, +0.234]
+  Q30_420              0.583            0.703  +0.120 [+0.052, +0.187]                0.500              0.631  +0.131 [+0.091, +0.166]
+  Q95_444              0.992            1.000  +0.008 [+0.003, +0.014]                0.830              0.994  +0.164 [+0.115, +0.214]
+  Q75_444              0.817            0.918  +0.101 [+0.059, +0.149]                0.525              0.850  +0.325 [+0.280, +0.364]
+  Q85_422              0.820            0.914  +0.094 [+0.059, +0.127]                0.604              0.818  +0.214 [+0.171, +0.257]
+VERDICT janpr on AttGAN: PASS
+
+### janpr vs janpr_noadv on AttGAN  (information only, no verdict)
+  condition  AUC janpr_noadv        AUC janpr             dAUC [95% CI]   bal.acc janpr_noadv      bal.acc janpr        d bal.acc [95% CI]
+  orig                 1.000            1.000  +0.000 [-0.000, +0.000]                1.000              1.000  +0.000 [+0.000, +0.000]
+  Q95_420              0.941            0.943  +0.002 [-0.001, +0.007]                0.841              0.849  +0.007 [-0.012, +0.027]
+  Q90_420              0.929            0.929  +0.000 [-0.004, +0.005]                0.814              0.821  +0.007 [-0.001, +0.016]
+  Q70_420              0.849            0.850  +0.001 [-0.004, +0.006]                0.748              0.740  -0.008 [-0.018, +0.004]
+  Q50_420              0.823            0.820  -0.003 [-0.010, +0.004]                0.720              0.703  -0.018 [-0.031, -0.005]
+  Q30_420              0.702            0.703  +0.000 [-0.015, +0.014]                0.624              0.631  +0.007 [-0.011, +0.026]
+  Q95_444              1.000            1.000  -0.000 [-0.000, -0.000]                0.995              0.994  -0.001 [-0.005, +0.000]
+  Q75_444              0.918            0.918  -0.000 [-0.004, +0.004]                0.845              0.850  +0.005 [-0.007, +0.015]
+  Q85_422              0.916            0.914  -0.002 [-0.005, +0.001]                0.819              0.818  -0.001 [-0.011, +0.008]
+
+### janpr_noadv vs ycdsbn on AttGAN  (information only, no verdict)
+  condition       AUC ycdsbn  AUC janpr_noadv             dAUC [95% CI]       bal.acc ycdsbn bal.acc janpr_noadv        d bal.acc [95% CI]
+  orig                 1.000            1.000  +0.000 [+0.000, +0.000]                0.998              1.000  +0.002 [+0.000, +0.006]
+  Q95_420              0.801            0.941  +0.140 [+0.093, +0.193]                0.700              0.841  +0.141 [+0.080, +0.200]
+  Q90_420              0.794            0.929  +0.135 [+0.093, +0.178]                0.725              0.814  +0.089 [+0.037, +0.147]
+  Q70_420              0.692            0.849  +0.158 [+0.105, +0.209]                0.645              0.748  +0.103 [+0.051, +0.158]
+  Q50_420              0.638            0.823  +0.185 [+0.129, +0.237]                0.617              0.720  +0.104 [+0.053, +0.152]
+  Q30_420              0.551            0.702  +0.151 [+0.085, +0.212]                0.542              0.624  +0.082 [+0.032, +0.138]
+  Q95_444              0.979            1.000  +0.021 [+0.009, +0.037]                0.910              0.995  +0.085 [+0.061, +0.121]
+  Q75_444              0.776            0.918  +0.142 [+0.098, +0.195]                0.692              0.845  +0.153 [+0.111, +0.208]
+  Q85_422              0.812            0.916  +0.104 [+0.073, +0.139]                0.738              0.819  +0.081 [+0.040, +0.126]
+
+### plain vs released on BEGAN  (information only, no verdict)
+  condition     AUC released        AUC plain             dAUC [95% CI]     bal.acc released      bal.acc plain        d bal.acc [95% CI]
+  orig                 1.000            1.000  -0.000 [-0.000, -0.000]                0.990              0.748  -0.241 [-0.251, -0.230]
+  Q95_420              0.082            0.417  +0.336 [+0.318, +0.352]                0.497              0.430  -0.067 [-0.079, -0.055]
+  Q90_420              0.034            0.384  +0.350 [+0.334, +0.366]                0.489              0.380  -0.109 [-0.123, -0.097]
+  Q70_420              0.099            0.419  +0.321 [+0.303, +0.336]                0.498              0.429  -0.068 [-0.078, -0.057]
+  Q50_420              0.114            0.425  +0.311 [+0.296, +0.329]                0.499              0.465  -0.035 [-0.041, -0.028]
+
+### ycdsbn vs plain on BEGAN  (information only, no verdict)
+  condition        AUC plain       AUC ycdsbn             dAUC [95% CI]        bal.acc plain     bal.acc ycdsbn        d bal.acc [95% CI]
+  orig                 1.000            0.977  -0.023 [-0.028, -0.020]                0.748              0.739  -0.010 [-0.021, +0.001]
+  Q95_420              0.417            0.435  +0.018 [-0.002, +0.037]                0.430              0.467  +0.037 [+0.018, +0.056]
+  Q90_420              0.384            0.406  +0.022 [+0.003, +0.039]                0.380              0.457  +0.078 [+0.061, +0.092]
+  Q70_420              0.419            0.452  +0.032 [+0.012, +0.051]                0.429              0.480  +0.051 [+0.035, +0.067]
+  Q50_420              0.425            0.454  +0.029 [+0.005, +0.050]                0.465              0.467  +0.002 [-0.015, +0.018]
+
+### janpr_noadv vs plain on BEGAN  (information only, no verdict)
+  condition        AUC plain  AUC janpr_noadv             dAUC [95% CI]        bal.acc plain bal.acc janpr_noadv        d bal.acc [95% CI]
+  orig                 1.000            1.000  +0.000 [+0.000, +0.000]                0.748              0.857  +0.109 [+0.097, +0.123]
+  Q95_420              0.417            0.760  +0.343 [+0.323, +0.363]                0.430              0.580  +0.150 [+0.139, +0.165]
+  Q90_420              0.384            0.708  +0.324 [+0.305, +0.341]                0.380              0.622  +0.242 [+0.229, +0.256]
+  Q70_420              0.419            0.470  +0.051 [+0.032, +0.072]                0.429              0.543  +0.113 [+0.098, +0.125]
+  Q50_420              0.425            0.495  +0.070 [+0.046, +0.089]                0.465              0.531  +0.067 [+0.052, +0.081]
+
+### janpr vs plain on BEGAN  (information only, no verdict)
+  condition        AUC plain        AUC janpr             dAUC [95% CI]        bal.acc plain      bal.acc janpr        d bal.acc [95% CI]
+  orig                 1.000            1.000  +0.000 [+0.000, +0.000]                0.748              0.857  +0.108 [+0.097, +0.122]
+  Q95_420              0.417            0.719  +0.302 [+0.282, +0.322]                0.430              0.579  +0.148 [+0.136, +0.163]
+  Q90_420              0.384            0.679  +0.295 [+0.276, +0.311]                0.380              0.619  +0.239 [+0.226, +0.255]
+  Q70_420              0.419            0.462  +0.042 [+0.024, +0.061]                0.429              0.538  +0.109 [+0.093, +0.122]
+  Q50_420              0.425            0.492  +0.067 [+0.044, +0.085]                0.465              0.528  +0.064 [+0.048, +0.079]
+
+### janpr vs janpr_noadv on BEGAN  (information only, no verdict)
+  condition  AUC janpr_noadv        AUC janpr             dAUC [95% CI]   bal.acc janpr_noadv      bal.acc janpr        d bal.acc [95% CI]
+  orig                 1.000            1.000  -0.000 [-0.000, +0.000]                0.857              0.857  -0.000 [-0.002, +0.002]
+  Q95_420              0.760            0.719  -0.041 [-0.044, -0.038]                0.580              0.579  -0.002 [-0.004, +0.001]
+  Q90_420              0.708            0.679  -0.029 [-0.032, -0.026]                0.622              0.619  -0.003 [-0.006, +0.000]
+  Q70_420              0.470            0.462  -0.009 [-0.012, -0.006]                0.543              0.538  -0.005 [-0.010, +0.001]
+  Q50_420              0.495            0.492  -0.003 [-0.006, +0.000]                0.531              0.528  -0.003 [-0.009, +0.004]
+
+### janpr_noadv vs ycdsbn on BEGAN  (information only, no verdict)
+  condition       AUC ycdsbn  AUC janpr_noadv             dAUC [95% CI]       bal.acc ycdsbn bal.acc janpr_noadv        d bal.acc [95% CI]
+  orig                 0.977            1.000  +0.023 [+0.020, +0.028]                0.739              0.857  +0.118 [+0.108, +0.129]
+  Q95_420              0.435            0.760  +0.325 [+0.308, +0.342]                0.467              0.580  +0.113 [+0.099, +0.129]
+  Q90_420              0.406            0.708  +0.302 [+0.287, +0.317]                0.457              0.622  +0.164 [+0.152, +0.180]
+  Q70_420              0.452            0.470  +0.019 [+0.006, +0.032]                0.480              0.543  +0.063 [+0.049, +0.076]
+  Q50_420              0.454            0.495  +0.041 [+0.026, +0.060]                0.467              0.531  +0.064 [+0.048, +0.081]
+
+### plain vs released on SNGAN  (information only, no verdict)
+  condition     AUC released        AUC plain             dAUC [95% CI]     bal.acc released      bal.acc plain        d bal.acc [95% CI]
+  orig                 0.985            0.920  -0.065 [-0.072, -0.056]                0.888              0.811  -0.078 [-0.090, -0.065]
+  Q95_420              0.487            0.474  -0.013 [-0.036, +0.009]                0.501              0.499  -0.002 [-0.008, +0.002]
+  Q90_420              0.481            0.468  -0.013 [-0.037, +0.012]                0.499              0.490  -0.009 [-0.014, -0.004]
+  Q70_420              0.483            0.479  -0.004 [-0.029, +0.019]                0.500              0.493  -0.007 [-0.013, -0.001]
+  Q50_420              0.478            0.491  +0.013 [-0.010, +0.036]                0.499              0.499  -0.001 [-0.007, +0.005]
+
+### ycdsbn vs plain on SNGAN  (information only, no verdict)
+  condition        AUC plain       AUC ycdsbn             dAUC [95% CI]        bal.acc plain     bal.acc ycdsbn        d bal.acc [95% CI]
+  orig                 0.920            0.804  -0.116 [-0.128, -0.107]                0.811              0.687  -0.123 [-0.139, -0.112]
+  Q95_420              0.474            0.479  +0.006 [-0.007, +0.019]                0.499              0.490  -0.008 [-0.019, +0.003]
+  Q90_420              0.468            0.478  +0.011 [+0.000, +0.022]                0.490              0.485  -0.005 [-0.017, +0.008]
+  Q70_420              0.479            0.499  +0.020 [+0.005, +0.034]                0.493              0.500  +0.007 [-0.005, +0.020]
+  Q50_420              0.491            0.513  +0.022 [+0.005, +0.040]                0.499              0.510  +0.011 [-0.007, +0.025]
+
+### janpr_noadv vs plain on SNGAN  (information only, no verdict)
+  condition        AUC plain  AUC janpr_noadv             dAUC [95% CI]        bal.acc plain bal.acc janpr_noadv        d bal.acc [95% CI]
+  orig                 0.920            0.936  +0.016 [+0.008, +0.024]                0.811              0.797  -0.014 [-0.025, -0.003]
+  Q95_420              0.474            0.501  +0.028 [+0.015, +0.040]                0.499              0.494  -0.005 [-0.017, +0.008]
+  Q90_420              0.468            0.488  +0.020 [+0.009, +0.030]                0.490              0.489  -0.001 [-0.012, +0.011]
+  Q70_420              0.479            0.502  +0.023 [+0.010, +0.036]                0.493              0.500  +0.007 [-0.005, +0.019]
+  Q50_420              0.491            0.516  +0.024 [+0.008, +0.043]                0.499              0.508  +0.010 [-0.003, +0.024]
+
+### janpr vs plain on SNGAN  (information only, no verdict)
+  condition        AUC plain        AUC janpr             dAUC [95% CI]        bal.acc plain      bal.acc janpr        d bal.acc [95% CI]
+  orig                 0.920            0.934  +0.014 [+0.006, +0.022]                0.811              0.796  -0.015 [-0.026, -0.004]
+  Q95_420              0.474            0.501  +0.027 [+0.014, +0.039]                0.499              0.494  -0.005 [-0.017, +0.008]
+  Q90_420              0.468            0.488  +0.020 [+0.009, +0.030]                0.490              0.493  +0.003 [-0.008, +0.014]
+  Q70_420              0.479            0.503  +0.024 [+0.010, +0.037]                0.493              0.499  +0.006 [-0.008, +0.018]
+  Q50_420              0.491            0.515  +0.024 [+0.008, +0.042]                0.499              0.508  +0.009 [-0.004, +0.023]
+
+### janpr vs janpr_noadv on SNGAN  (information only, no verdict)
+  condition  AUC janpr_noadv        AUC janpr             dAUC [95% CI]   bal.acc janpr_noadv      bal.acc janpr        d bal.acc [95% CI]
+  orig                 0.936            0.934  -0.002 [-0.002, -0.002]                0.797              0.796  -0.001 [-0.003, +0.001]
+  Q95_420              0.501            0.501  -0.000 [-0.002, +0.001]                0.494              0.494  -0.000 [-0.005, +0.005]
+  Q90_420              0.488            0.488  -0.000 [-0.001, +0.001]                0.489              0.493  +0.003 [-0.001, +0.007]
+  Q70_420              0.502            0.503  +0.001 [-0.000, +0.002]                0.500              0.499  -0.001 [-0.005, +0.003]
+  Q50_420              0.516            0.515  -0.000 [-0.002, +0.001]                0.508              0.508  -0.001 [-0.005, +0.004]
+
+### janpr_noadv vs ycdsbn on SNGAN  (information only, no verdict)
+  condition       AUC ycdsbn  AUC janpr_noadv             dAUC [95% CI]       bal.acc ycdsbn bal.acc janpr_noadv        d bal.acc [95% CI]
+  orig                 0.804            0.936  +0.132 [+0.124, +0.142]                0.687              0.797  +0.110 [+0.101, +0.119]
+  Q95_420              0.479            0.501  +0.022 [+0.011, +0.034]                0.490              0.494  +0.004 [-0.007, +0.015]
+  Q90_420              0.478            0.488  +0.010 [-0.000, +0.019]                0.485              0.489  +0.004 [-0.007, +0.015]
+  Q70_420              0.499            0.502  +0.003 [-0.007, +0.014]                0.500              0.500  +0.000 [-0.014, +0.012]
+  Q50_420              0.513            0.516  +0.003 [-0.011, +0.017]                0.510              0.508  -0.001 [-0.015, +0.014]
+
+### plain vs released on STGAN  (information only, no verdict)
+  condition     AUC released        AUC plain             dAUC [95% CI]     bal.acc released      bal.acc plain        d bal.acc [95% CI]
+  orig                 1.000            0.999  -0.001 [-0.001, -0.000]                0.980              0.984  +0.005 [-0.003, +0.013]
+  Q95_420              0.427            0.344  -0.083 [-0.122, -0.047]                0.497              0.496  -0.002 [-0.013, +0.010]
+  Q90_420              0.415            0.341  -0.074 [-0.111, -0.034]                0.498              0.501  +0.003 [-0.007, +0.013]
+  Q70_420              0.421            0.374  -0.047 [-0.083, -0.012]                0.501              0.502  +0.001 [-0.009, +0.009]
+  Q50_420              0.414            0.381  -0.033 [-0.071, +0.002]                0.500              0.499  -0.001 [-0.008, +0.006]
+
+### ycdsbn vs plain on STGAN  (information only, no verdict)
+  condition        AUC plain       AUC ycdsbn             dAUC [95% CI]        bal.acc plain     bal.acc ycdsbn        d bal.acc [95% CI]
+  orig                 0.999            0.947  -0.053 [-0.071, -0.040]                0.984              0.855  -0.129 [-0.146, -0.110]
+  Q95_420              0.344            0.433  +0.088 [+0.067, +0.110]                0.496              0.493  -0.002 [-0.020, +0.015]
+  Q90_420              0.341            0.396  +0.054 [+0.032, +0.072]                0.501              0.474  -0.027 [-0.046, -0.006]
+  Q70_420              0.374            0.354  -0.020 [-0.044, +0.001]                0.502              0.433  -0.069 [-0.088, -0.052]
+  Q50_420              0.381            0.375  -0.006 [-0.028, +0.020]                0.499              0.436  -0.062 [-0.080, -0.044]
+
+### janpr_noadv vs plain on STGAN  (information only, no verdict)
+  condition        AUC plain  AUC janpr_noadv             dAUC [95% CI]        bal.acc plain bal.acc janpr_noadv        d bal.acc [95% CI]
+  orig                 0.999            0.997  -0.002 [-0.003, -0.001]                0.984              0.941  -0.044 [-0.053, -0.033]
+  Q95_420              0.344            0.582  +0.237 [+0.214, +0.265]                0.496              0.587  +0.091 [+0.070, +0.110]
+  Q90_420              0.341            0.475  +0.134 [+0.109, +0.156]                0.501              0.546  +0.045 [+0.025, +0.064]
+  Q70_420              0.374            0.398  +0.023 [+0.001, +0.046]                0.502              0.499  -0.003 [-0.023, +0.014]
+  Q50_420              0.381            0.417  +0.037 [+0.011, +0.066]                0.499              0.492  -0.007 [-0.026, +0.011]
+
+### janpr vs plain on STGAN  (information only, no verdict)
+  condition        AUC plain        AUC janpr             dAUC [95% CI]        bal.acc plain      bal.acc janpr        d bal.acc [95% CI]
+  orig                 0.999            0.997  -0.002 [-0.004, -0.001]                0.984              0.941  -0.044 [-0.054, -0.033]
+  Q95_420              0.344            0.586  +0.242 [+0.219, +0.269]                0.496              0.591  +0.095 [+0.071, +0.115]
+  Q90_420              0.341            0.480  +0.139 [+0.114, +0.160]                0.501              0.553  +0.052 [+0.033, +0.071]
+  Q70_420              0.374            0.399  +0.025 [+0.003, +0.048]                0.502              0.495  -0.006 [-0.026, +0.012]
+  Q50_420              0.381            0.418  +0.037 [+0.012, +0.067]                0.499              0.493  -0.006 [-0.026, +0.012]
+
+### janpr vs janpr_noadv on STGAN  (information only, no verdict)
+  condition  AUC janpr_noadv        AUC janpr             dAUC [95% CI]   bal.acc janpr_noadv      bal.acc janpr        d bal.acc [95% CI]
+  orig                 0.997            0.997  -0.000 [-0.000, -0.000]                0.941              0.941  -0.000 [-0.001, +0.001]
+  Q95_420              0.582            0.586  +0.005 [+0.003, +0.006]                0.587              0.591  +0.004 [-0.000, +0.008]
+  Q90_420              0.475            0.480  +0.005 [+0.003, +0.007]                0.546              0.553  +0.007 [+0.003, +0.013]
+  Q70_420              0.398            0.399  +0.002 [-0.000, +0.004]                0.499              0.495  -0.003 [-0.009, +0.002]
+  Q50_420              0.417            0.418  +0.001 [-0.002, +0.003]                0.492              0.493  +0.001 [-0.005, +0.007]
+
+### janpr_noadv vs ycdsbn on STGAN  (information only, no verdict)
+  condition       AUC ycdsbn  AUC janpr_noadv             dAUC [95% CI]       bal.acc ycdsbn bal.acc janpr_noadv        d bal.acc [95% CI]
+  orig                 0.947            0.997  +0.051 [+0.038, +0.068]                0.855              0.941  +0.086 [+0.072, +0.100]
+  Q95_420              0.433            0.582  +0.149 [+0.128, +0.172]                0.493              0.587  +0.093 [+0.075, +0.111]
+  Q90_420              0.396            0.475  +0.080 [+0.054, +0.102]                0.474              0.546  +0.072 [+0.054, +0.090]
+  Q70_420              0.354            0.398  +0.043 [+0.020, +0.066]                0.433              0.499  +0.066 [+0.050, +0.084]
+  Q50_420              0.375            0.417  +0.042 [+0.019, +0.066]                0.436              0.492  +0.056 [+0.036, +0.075]
+
+### Summary
+  mode single, trained on AttGAN, JPEG Q30-95 subsampling 2,0, seed 0
+  parameters used at test time: released 1.438M, plain 1.438M, ycdsbn 1.438M, janpr_noadv 1.488M, janpr 1.488M
+
+  AttGAN (seen): AUC
+    arm              orig  Q95_420  Q90_420  Q70_420  Q50_420
+    released        0.956    0.233    0.245    0.330    0.323
+    plain           1.000    0.794    0.807    0.773    0.683
+    ycdsbn          1.000    0.801    0.794    0.692    0.638
+    janpr_noadv     1.000    0.941    0.929    0.849    0.823
+    janpr           1.000    0.943    0.929    0.850    0.820
+
+  BEGAN (never seen): AUC
+    arm              orig  Q95_420  Q90_420  Q70_420  Q50_420
+    released        1.000    0.082    0.034    0.099    0.114
+    plain           1.000    0.417    0.384    0.419    0.425
+    ycdsbn          0.977    0.435    0.406    0.452    0.454
+    janpr_noadv     1.000    0.760    0.708    0.470    0.495
+    janpr           1.000    0.719    0.679    0.462    0.492
+
+  SNGAN (never seen): AUC
+    arm              orig  Q95_420  Q90_420  Q70_420  Q50_420
+    released        0.985    0.487    0.481    0.483    0.478
+    plain           0.920    0.474    0.468    0.479    0.491
+    ycdsbn          0.804    0.479    0.478    0.499    0.513
+    janpr_noadv     0.936    0.501    0.488    0.502    0.516
+    janpr           0.934    0.501    0.488    0.503    0.515
+
+  STGAN (never seen): AUC
+    arm              orig  Q95_420  Q90_420  Q70_420  Q50_420
+    released        1.000    0.427    0.415    0.421    0.414
+    plain           0.999    0.344    0.341    0.374    0.381
+    ycdsbn          0.947    0.433    0.396    0.354    0.375
+    janpr_noadv     0.997    0.582    0.475    0.398    0.417
+    janpr           0.997    0.586    0.480    0.399    0.418
+
+  VERDICT ycdsbn       on AttGAN   FAIL
+  VERDICT janpr_noadv  on AttGAN   PASS
+  VERDICT janpr        on AttGAN   PASS
+
+wrote /content/npr_t3_single_AttGAN_seed0.csv

@@ -1,0 +1,121 @@
+/content
+npr_tests_colab t1 | device cuda
+self-check: brightness/colour input with full-size colour reproduces the released NPR, max diff 3.05e-04
+self-check passed: all arms start from the released NPR
+
+train 3194  test 806  faces shared by train and test: 0
+
+training: plain
+  epoch 1/6  loss 6.5068  51s
+  epoch 2/6  loss 3.6239  52s
+  epoch 3/6  loss 2.4735  53s
+  epoch 4/6  loss 1.8515  53s
+  epoch 5/6  loss 1.4884  53s
+  epoch 6/6  loss 1.2392  53s
+== plain | AttGAN ==
+  orig     AUC 0.999 [0.998, 1.000]  at 0.5: bal.acc 0.949 (fakes caught 0.995, reals passed 0.902)
+  Q95_420  AUC 0.829 [0.781, 0.874]  at 0.5: bal.acc 0.549 (fakes caught 0.106, reals passed 0.993)
+  Q90_420  AUC 0.826 [0.774, 0.873]  at 0.5: bal.acc 0.548 (fakes caught 0.106, reals passed 0.990)
+  Q70_420  AUC 0.775 [0.712, 0.833]  at 0.5: bal.acc 0.521 (fakes caught 0.049, reals passed 0.993)
+  Q50_420  AUC 0.667 [0.598, 0.732]  at 0.5: bal.acc 0.500 (fakes caught 0.005, reals passed 0.995)
+  Q95_444  AUC 0.993 [0.988, 0.997]  at 0.5: bal.acc 0.782 (fakes caught 0.564, reals passed 1.000)
+  Q75_444  AUC 0.671 [0.598, 0.742]  at 0.5: bal.acc 0.500 (fakes caught 0.000, reals passed 1.000)
+
+### Probe (no training): does the plain model rely on the colour detail the decoder invents?
+  normal = as decoded; cellmean = one colour value per 2x2 cell; gray = no colour at all
+  orig     AUC  normal 0.999   cellmean 0.863   gray 0.863
+  Q95_420  AUC  normal 0.829   cellmean 0.865   gray 0.865
+  Q90_420  AUC  normal 0.826   cellmean 0.848   gray 0.848
+  Q95_444  AUC  normal 0.993   cellmean 0.865   gray 0.865
+  Read: if cellmean is close to normal on the 4:2:0 rows, the decoder's colour detail carries nothing
+  the model uses, and the colour signal sits at half size (supports ycnpr). If cellmean falls a lot,
+  the model leans on decoder-made colour, which the 4:2:0 file does not actually contain.
+training: ycnpr
+  epoch 1/6  loss 5.8201  56s
+  epoch 2/6  loss 3.7316  56s
+  epoch 3/6  loss 2.7411  55s
+  epoch 4/6  loss 2.1743  56s
+  epoch 5/6  loss 1.7329  55s
+  epoch 6/6  loss 1.3863  55s
+== ycnpr | AttGAN ==
+  orig     AUC 1.000 [1.000, 1.000]  at 0.5: bal.acc 0.996 (fakes caught 0.993, reals passed 1.000)
+  Q95_420  AUC 0.906 [0.872, 0.936]  at 0.5: bal.acc 0.775 (fakes caught 0.606, reals passed 0.945)
+  Q90_420  AUC 0.878 [0.834, 0.915]  at 0.5: bal.acc 0.792 (fakes caught 0.712, reals passed 0.873)
+  Q70_420  AUC 0.697 [0.638, 0.754]  at 0.5: bal.acc 0.568 (fakes caught 0.212, reals passed 0.925)
+  Q50_420  AUC 0.642 [0.561, 0.711]  at 0.5: bal.acc 0.510 (fakes caught 0.027, reals passed 0.993)
+  Q95_444  AUC 0.992 [0.984, 0.997]  at 0.5: bal.acc 0.688 (fakes caught 0.377, reals passed 1.000)
+  Q75_444  AUC 0.533 [0.444, 0.614]  at 0.5: bal.acc 0.500 (fakes caught 0.000, reals passed 1.000)
+
+### ycnpr vs plain
+Rule (fixed before the run): PASS if AUC is clearly better than plain on Q95_420 and Q90_420, and not clearly worse on orig.
+  condition AUC plain      ycnpr AUC             dAUC [95% CI]   bal.acc plain    ycnpr bal.acc        d bal.acc [95% CI]
+  orig          0.999          1.000  +0.001 [+0.000, +0.002]           0.949            0.996  +0.048 [+0.033, +0.064]
+  Q95_420       0.829          0.906  +0.076 [+0.034, +0.121]           0.549            0.775  +0.226 [+0.173, +0.282]
+  Q90_420       0.826          0.878  +0.051 [+0.006, +0.094]           0.548            0.792  +0.244 [+0.191, +0.294]
+  Q70_420       0.775          0.697  -0.078 [-0.133, -0.021]           0.521            0.568  +0.048 [+0.018, +0.078]
+  Q50_420       0.667          0.642  -0.026 [-0.096, +0.043]           0.500            0.510  +0.010 [-0.000, +0.023]
+  Q95_444       0.993          0.992  -0.001 [-0.008, +0.005]           0.782            0.688  -0.094 [-0.149, -0.041]
+  Q75_444       0.671          0.533  -0.138 [-0.208, -0.071]           0.500            0.500  +0.000 [+0.000, +0.000]
+VERDICT ycnpr: PASS
+training: dsbn
+  epoch 1/6  loss 6.5069  53s
+  epoch 2/6  loss 3.6243  53s
+  epoch 3/6  loss 2.4734  53s
+  epoch 4/6  loss 1.8514  53s
+  epoch 5/6  loss 1.4884  53s
+  epoch 6/6  loss 1.2398  53s
+== dsbn | AttGAN ==
+  orig     AUC 1.000 [1.000, 1.000]  at 0.5: bal.acc 0.989 (fakes caught 0.978, reals passed 1.000)
+  Q95_420  AUC 0.843 [0.804, 0.881]  at 0.5: bal.acc 0.750 (fakes caught 0.717, reals passed 0.782)
+  Q90_420  AUC 0.828 [0.787, 0.869]  at 0.5: bal.acc 0.735 (fakes caught 0.704, reals passed 0.765)
+  Q70_420  AUC 0.751 [0.701, 0.800]  at 0.5: bal.acc 0.679 (fakes caught 0.685, reals passed 0.672)
+  Q50_420  AUC 0.618 [0.556, 0.681]  at 0.5: bal.acc 0.536 (fakes caught 0.300, reals passed 0.772)
+  Q95_444  AUC 0.996 [0.992, 0.998]  at 0.5: bal.acc 0.964 (fakes caught 0.988, reals passed 0.940)
+  Q75_444  AUC 0.647 [0.579, 0.708]  at 0.5: bal.acc 0.509 (fakes caught 0.027, reals passed 0.990)
+
+### dsbn vs plain
+Rule (fixed before the run): PASS if balanced accuracy at the normal 0.5 cut-off is clearly better than plain on Q95_420 and Q90_420, and AUC is not clearly worse on Q95_420.
+  condition AUC plain       dsbn AUC             dAUC [95% CI]   bal.acc plain     dsbn bal.acc        d bal.acc [95% CI]
+  orig          0.999          1.000  +0.001 [+0.000, +0.002]           0.949            0.989  +0.040 [+0.022, +0.058]
+  Q95_420       0.829          0.843  +0.014 [-0.021, +0.057]           0.549            0.750  +0.200 [+0.157, +0.249]
+  Q90_420       0.826          0.828  +0.002 [-0.028, +0.044]           0.548            0.735  +0.187 [+0.145, +0.232]
+  Q70_420       0.775          0.751  -0.024 [-0.062, +0.019]           0.521            0.679  +0.158 [+0.117, +0.201]
+  Q50_420       0.667          0.618  -0.050 [-0.096, +0.002]           0.500            0.536  +0.037 [-0.012, +0.089]
+  Q95_444       0.993          0.996  +0.002 [-0.001, +0.007]           0.782            0.964  +0.182 [+0.129, +0.230]
+  Q75_444       0.671          0.647  -0.024 [-0.062, +0.026]           0.500            0.509  +0.009 [-0.000, +0.018]
+VERDICT dsbn: PASS
+training: featcons
+  epoch 1/6  loss 6.5686  54s
+  epoch 2/6  loss 3.6751  53s
+  epoch 3/6  loss 2.5178  52s
+  epoch 4/6  loss 1.8907  53s
+  epoch 5/6  loss 1.5236  53s
+  epoch 6/6  loss 1.2703  53s
+== featcons | AttGAN ==
+  orig     AUC 0.999 [0.998, 1.000]  at 0.5: bal.acc 0.949 (fakes caught 0.995, reals passed 0.902)
+  Q95_420  AUC 0.829 [0.781, 0.874]  at 0.5: bal.acc 0.550 (fakes caught 0.108, reals passed 0.993)
+  Q90_420  AUC 0.826 [0.774, 0.872]  at 0.5: bal.acc 0.548 (fakes caught 0.106, reals passed 0.990)
+  Q70_420  AUC 0.775 [0.712, 0.832]  at 0.5: bal.acc 0.521 (fakes caught 0.049, reals passed 0.993)
+  Q50_420  AUC 0.667 [0.598, 0.733]  at 0.5: bal.acc 0.500 (fakes caught 0.005, reals passed 0.995)
+  Q95_444  AUC 0.993 [0.988, 0.997]  at 0.5: bal.acc 0.783 (fakes caught 0.567, reals passed 1.000)
+  Q75_444  AUC 0.671 [0.598, 0.742]  at 0.5: bal.acc 0.500 (fakes caught 0.000, reals passed 1.000)
+
+### featcons vs plain
+Rule (fixed before the run): PASS if AUC is clearly better than plain on Q95_420 and Q90_420, and not clearly worse on orig.
+  condition AUC plain   featcons AUC             dAUC [95% CI]   bal.acc plain featcons bal.acc        d bal.acc [95% CI]
+  orig          0.999          0.999  +0.000 [-0.000, +0.000]           0.949            0.949  +0.000 [+0.000, +0.000]
+  Q95_420       0.829          0.829  -0.000 [-0.000, +0.000]           0.549            0.550  +0.001 [+0.000, +0.004]
+  Q90_420       0.826          0.826  +0.000 [-0.000, +0.000]           0.548            0.548  +0.000 [+0.000, +0.000]
+  Q70_420       0.775          0.775  -0.000 [-0.000, +0.000]           0.521            0.521  +0.000 [+0.000, +0.000]
+  Q50_420       0.667          0.667  +0.000 [-0.000, +0.001]           0.500            0.500  +0.000 [+0.000, +0.000]
+  Q95_444       0.993          0.993  +0.000 [-0.000, +0.000]           0.782            0.783  +0.001 [+0.000, +0.004]
+  Q75_444       0.671          0.671  -0.000 [-0.001, +0.000]           0.500            0.500  +0.000 [+0.000, +0.000]
+VERDICT featcons: FAIL
+
+### Summary
+  anchor: plain AUC at Q95_420 = 0.829 (earlier runs: 0.829 and 0.830)
+  ycnpr     PASS
+  dsbn      PASS
+  featcons  FAIL
+
+wrote /content/npr_tests.csv

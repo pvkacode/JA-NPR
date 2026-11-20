@@ -846,8 +846,9 @@ images are unchanged.
 - **On uncompressed images, pre-compressed fakes are called real by every model.** The detectors
   partly learn "old JPEG traces mean real".
 
-CSV files for t4 and t5 were not saved to this repo; every number above is copied from the logs in
-`results/logs`.
+The full numbers for 5.1 and 5.3 are in `results/csv/t5_controls_AttGAN_seed0.csv` and
+`results/csv/t4_controls_BEGANcontrol_AttGAN_seed0.csv`. No CSV was saved for 5.2; its numbers are
+copied from `results/logs/t5_controls_heldout_STGAN+BEGAN_seed0.log`.
 
 ## 6. Seven unseen generators (t5, trained on AttGAN + SNGAN, seed 1)
 
@@ -883,4 +884,5 @@ JA-NPR minus janpr_constq, paired, with 95% CI.
   unseen generators.
 - **S3GAN is hard even uncompressed:** NPR fine-tuned reaches 0.650 AUC on PNG.
 
-No CSV was saved for this run; the numbers are copied from `results/logs/t5_heldout_7gens_seed1.log`.
+Full numbers: `results/csv/t5_heldout_7gens_seed1.csv`. Paired comparisons:
+`results/logs/t5_heldout_7gens_seed1.log`.

@@ -1,0 +1,138 @@
+npr_t3_colab t3 | device cuda
+self-check passed: every arm starts exactly at the released NPR (before training)
+self-check: header reading  Q95 4:2:0 -> [1.0, 0.38, 0.45, 1.0]   Q30 4:4:4 -> [1.0, 0.91, 0.99, 0.0]
+
+AttGAN: train 3194  test 806  groups shared by train and test: 0
+  AttGAN resampling 0_real: by face id, 1_fake: by face id
+mode single | training images 3194 | crop 224 | JPEG quality 30-95, subsampling 2,0 | seed 1
+
+training: plain  [1.438M parameters used at test time]
+  epoch 1/6  loss 7.8135  35s
+  epoch 2/6  loss 4.7411  36s
+  epoch 3/6  loss 3.3760  37s
+  epoch 4/6  loss 2.4737  38s
+  epoch 5/6  loss 1.8669  37s
+  epoch 6/6  loss 1.4487  38s
+== plain | AttGAN (seen in training) ==
+  orig     AUC 0.999 [0.998, 1.000]  at 0.5: bal.acc 0.943 (fakes caught 1.000, reals passed 0.885)
+  Q95_420  AUC 0.784 [0.723, 0.846]  at 0.5: bal.acc 0.575 (fakes caught 0.172, reals passed 0.978)
+  Q90_420  AUC 0.795 [0.736, 0.854]  at 0.5: bal.acc 0.565 (fakes caught 0.150, reals passed 0.980)
+  Q70_420  AUC 0.750 [0.695, 0.810]  at 0.5: bal.acc 0.536 (fakes caught 0.096, reals passed 0.975)
+  Q50_420  AUC 0.686 [0.629, 0.757]  at 0.5: bal.acc 0.518 (fakes caught 0.047, reals passed 0.990)
+  Q30_420  AUC 0.602 [0.529, 0.689]  at 0.5: bal.acc 0.499 (fakes caught 0.002, reals passed 0.995)
+  Q95_444  AUC 0.982 [0.972, 0.991]  at 0.5: bal.acc 0.775 (fakes caught 0.557, reals passed 0.993)
+  Q75_444  AUC 0.820 [0.772, 0.872]  at 0.5: bal.acc 0.538 (fakes caught 0.084, reals passed 0.993)
+  Q85_422  AUC 0.799 [0.748, 0.848]  at 0.5: bal.acc 0.634 (fakes caught 0.315, reals passed 0.953)
+training: janpr_noadv  [1.488M parameters used at test time]
+  epoch 1/6  loss 3.9148  48s
+  epoch 2/6  loss 1.1266  47s
+  epoch 3/6  loss 0.8295  47s
+  epoch 4/6  loss 0.6627  47s
+  epoch 5/6  loss 0.6421  47s
+  epoch 6/6  loss 0.6054  47s
+== janpr_noadv | AttGAN (seen in training) ==
+  orig     AUC 1.000 [1.000, 1.000]  at 0.5: bal.acc 0.995 (fakes caught 0.990, reals passed 1.000)
+  Q95_420  AUC 0.889 [0.839, 0.932]  at 0.5: bal.acc 0.769 (fakes caught 0.633, reals passed 0.905)
+  Q90_420  AUC 0.855 [0.794, 0.906]  at 0.5: bal.acc 0.777 (fakes caught 0.719, reals passed 0.835)
+  Q70_420  AUC 0.782 [0.722, 0.851]  at 0.5: bal.acc 0.696 (fakes caught 0.559, reals passed 0.833)
+  Q50_420  AUC 0.747 [0.678, 0.821]  at 0.5: bal.acc 0.648 (fakes caught 0.458, reals passed 0.838)
+  Q30_420  AUC 0.699 [0.624, 0.778]  at 0.5: bal.acc 0.606 (fakes caught 0.387, reals passed 0.825)
+  Q95_444  AUC 0.996 [0.992, 0.999]  at 0.5: bal.acc 0.953 (fakes caught 0.916, reals passed 0.990)
+  Q75_444  AUC 0.863 [0.809, 0.918]  at 0.5: bal.acc 0.794 (fakes caught 0.739, reals passed 0.850)
+  Q85_422  AUC 0.834 [0.774, 0.891]  at 0.5: bal.acc 0.768 (fakes caught 0.833, reals passed 0.703)
+
+### janpr_noadv vs plain on AttGAN
+Rule (fixed before the run): PASS if, against plain: AUC clearly better on Q95_420 and Q90_420; balanced accuracy at 0.5 clearly better on Q95_420 and Q90_420; and AUC not clearly worse on any of orig, Q70_420, Q50_420, Q30_420, Q95_444, Q75_444.
+  condition        AUC plain  AUC janpr_noadv             dAUC [95% CI]        bal.acc plain bal.acc janpr_noadv        d bal.acc [95% CI]
+  orig                 0.999            1.000  +0.001 [+0.000, +0.003]                0.943              0.995  +0.053 [+0.035, +0.071]
+  Q95_420              0.784            0.889  +0.105 [+0.039, +0.167]                0.575              0.769  +0.194 [+0.135, +0.248]
+  Q90_420              0.795            0.855  +0.060 [-0.001, +0.114]                0.565              0.777  +0.212 [+0.152, +0.265]
+  Q70_420              0.750            0.782  +0.032 [-0.027, +0.094]                0.536              0.696  +0.160 [+0.101, +0.218]
+  Q50_420              0.686            0.747  +0.062 [-0.012, +0.140]                0.518              0.648  +0.129 [+0.072, +0.194]
+  Q30_420              0.602            0.699  +0.096 [+0.013, +0.183]                0.499              0.606  +0.107 [+0.054, +0.166]
+  Q95_444              0.982            0.996  +0.014 [+0.007, +0.023]                0.775              0.953  +0.179 [+0.126, +0.238]
+  Q75_444              0.820            0.863  +0.043 [-0.014, +0.098]                0.538              0.794  +0.256 [+0.195, +0.316]
+  Q85_422              0.799            0.834  +0.035 [-0.019, +0.082]                0.634              0.768  +0.134 [+0.071, +0.190]
+VERDICT janpr_noadv on AttGAN: FAIL
+
+### Summary
+  mode single, trained on AttGAN, JPEG Q30-95 subsampling 2,0, seed 1
+  parameters used at test time: plain 1.438M, janpr_noadv 1.488M
+
+  AttGAN (seen): AUC
+    arm              orig  Q95_420  Q90_420  Q70_420  Q50_420
+    plain           0.999    0.784    0.795    0.750    0.686
+    janpr_noadv     1.000    0.889    0.855    0.782    0.747
+
+  VERDICT janpr_noadv  on AttGAN   FAIL
+
+wrote /content/npr_t3_single_AttGAN_seed1.csv
+npr_t3_colab t3 | device cuda
+self-check passed: every arm starts exactly at the released NPR (before training)
+self-check: header reading  Q95 4:2:0 -> [1.0, 0.38, 0.45, 1.0]   Q30 4:4:4 -> [1.0, 0.91, 0.99, 0.0]
+
+AttGAN: train 3194  test 806  groups shared by train and test: 0
+  AttGAN resampling 0_real: by face id, 1_fake: by face id
+mode single | training images 3194 | crop 224 | JPEG quality 30-95, subsampling 2,0 | seed 2
+
+training: plain  [1.438M parameters used at test time]
+  epoch 1/6  loss 7.5345  38s
+  epoch 2/6  loss 4.7560  38s
+  epoch 3/6  loss 3.2306  37s
+  epoch 4/6  loss 2.5524  37s
+  epoch 5/6  loss 1.9116  38s
+  epoch 6/6  loss 1.4692  37s
+== plain | AttGAN (seen in training) ==
+  orig     AUC 0.999 [0.997, 0.999]  at 0.5: bal.acc 0.950 (fakes caught 1.000, reals passed 0.900)
+  Q95_420  AUC 0.818 [0.774, 0.859]  at 0.5: bal.acc 0.579 (fakes caught 0.175, reals passed 0.983)
+  Q90_420  AUC 0.829 [0.791, 0.868]  at 0.5: bal.acc 0.570 (fakes caught 0.155, reals passed 0.985)
+  Q70_420  AUC 0.763 [0.714, 0.816]  at 0.5: bal.acc 0.532 (fakes caught 0.076, reals passed 0.988)
+  Q50_420  AUC 0.661 [0.599, 0.727]  at 0.5: bal.acc 0.502 (fakes caught 0.010, reals passed 0.995)
+  Q30_420  AUC 0.538 [0.467, 0.616]  at 0.5: bal.acc 0.499 (fakes caught 0.000, reals passed 0.998)
+  Q95_444  AUC 0.994 [0.989, 0.997]  at 0.5: bal.acc 0.828 (fakes caught 0.658, reals passed 0.998)
+  Q75_444  AUC 0.813 [0.770, 0.853]  at 0.5: bal.acc 0.534 (fakes caught 0.071, reals passed 0.998)
+  Q85_422  AUC 0.846 [0.803, 0.885]  at 0.5: bal.acc 0.640 (fakes caught 0.313, reals passed 0.968)
+training: janpr_noadv  [1.488M parameters used at test time]
+  epoch 1/6  loss 4.1154  48s
+  epoch 2/6  loss 1.1660  47s
+  epoch 3/6  loss 0.7999  47s
+  epoch 4/6  loss 0.7473  47s
+  epoch 5/6  loss 0.6426  47s
+  epoch 6/6  loss 0.6164  47s
+== janpr_noadv | AttGAN (seen in training) ==
+  orig     AUC 1.000 [1.000, 1.000]  at 0.5: bal.acc 0.999 (fakes caught 0.998, reals passed 1.000)
+  Q95_420  AUC 0.935 [0.909, 0.956]  at 0.5: bal.acc 0.866 (fakes caught 0.840, reals passed 0.892)
+  Q90_420  AUC 0.900 [0.861, 0.933]  at 0.5: bal.acc 0.822 (fakes caught 0.877, reals passed 0.767)
+  Q70_420  AUC 0.844 [0.806, 0.880]  at 0.5: bal.acc 0.734 (fakes caught 0.933, reals passed 0.535)
+  Q50_420  AUC 0.792 [0.736, 0.836]  at 0.5: bal.acc 0.687 (fakes caught 0.924, reals passed 0.450)
+  Q30_420  AUC 0.704 [0.644, 0.762]  at 0.5: bal.acc 0.621 (fakes caught 0.892, reals passed 0.350)
+  Q95_444  AUC 0.999 [0.998, 1.000]  at 0.5: bal.acc 0.991 (fakes caught 0.990, reals passed 0.993)
+  Q75_444  AUC 0.919 [0.884, 0.945]  at 0.5: bal.acc 0.818 (fakes caught 0.951, reals passed 0.685)
+  Q85_422  AUC 0.923 [0.893, 0.949]  at 0.5: bal.acc 0.770 (fakes caught 0.985, reals passed 0.555)
+
+### janpr_noadv vs plain on AttGAN
+Rule (fixed before the run): PASS if, against plain: AUC clearly better on Q95_420 and Q90_420; balanced accuracy at 0.5 clearly better on Q95_420 and Q90_420; and AUC not clearly worse on any of orig, Q70_420, Q50_420, Q30_420, Q95_444, Q75_444.
+  condition        AUC plain  AUC janpr_noadv             dAUC [95% CI]        bal.acc plain bal.acc janpr_noadv        d bal.acc [95% CI]
+  orig                 0.999            1.000  +0.001 [+0.000, +0.003]                0.950              0.999  +0.049 [+0.036, +0.064]
+  Q95_420              0.818            0.935  +0.117 [+0.066, +0.165]                0.579              0.866  +0.288 [+0.221, +0.343]
+  Q90_420              0.829            0.900  +0.072 [+0.015, +0.120]                0.570              0.822  +0.252 [+0.187, +0.309]
+  Q70_420              0.763            0.844  +0.081 [+0.023, +0.133]                0.532              0.734  +0.202 [+0.162, +0.238]
+  Q50_420              0.661            0.792  +0.131 [+0.058, +0.202]                0.502              0.687  +0.184 [+0.150, +0.215]
+  Q30_420              0.538            0.704  +0.166 [+0.069, +0.254]                0.499              0.621  +0.122 [+0.080, +0.157]
+  Q95_444              0.994            0.999  +0.006 [+0.002, +0.010]                0.828              0.991  +0.164 [+0.112, +0.217]
+  Q75_444              0.813            0.919  +0.107 [+0.060, +0.159]                0.534              0.818  +0.283 [+0.235, +0.319]
+  Q85_422              0.846            0.923  +0.077 [+0.043, +0.110]                0.640              0.770  +0.130 [+0.077, +0.181]
+VERDICT janpr_noadv on AttGAN: PASS
+
+### Summary
+  mode single, trained on AttGAN, JPEG Q30-95 subsampling 2,0, seed 2
+  parameters used at test time: plain 1.438M, janpr_noadv 1.488M
+
+  AttGAN (seen): AUC
+    arm              orig  Q95_420  Q90_420  Q70_420  Q50_420
+    plain           0.999    0.818    0.829    0.763    0.661
+    janpr_noadv     1.000    0.935    0.900    0.844    0.792
+
+  VERDICT janpr_noadv  on AttGAN   PASS
+
+wrote /content/npr_t3_single_AttGAN_seed2.csv

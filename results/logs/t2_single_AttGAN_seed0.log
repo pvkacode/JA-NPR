@@ -1,0 +1,329 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 51.0/51.0 kB 3.8 MB/s eta 0:00:00
+1k7msxU6dS4NPKzE8jxb6AsDx-Kp7MbFn AttGAN.tar.gz
+1ck_j-056-_L0bc1SJD5qt-ADDSxyGNJc BEGAN.tar.gz
+1_0nCtboh6spvnzT4lRKIMIAcaVfBYbsm CramerGAN.tar.gz
+1qSQywIVE9ZeP8bTZjpfgYR6jcDM6BK9w InfoMaxGAN.tar.gz
+1Aa7wGY28PJOYXAXMb4Jx6CzbhJm2mapq MMDGAN.tar.gz
+1md-y6GFb-28t_4-mUrSyRyerFC1pUOeq RelGAN.tar.gz
+1THixtJQsTO5Cd-8N4JIxormvV-wsGXuc S3GAN.tar.gz
+1L1iS_KdXaShhwNBNf3tGOYhxvRyeypek SNGAN.tar.gz
+1ChS-8jejuR1i7cWV0FoR9wjD0b1nvj30 STGAN.tar.gz
+Downloading...
+From (original): https://drive.google.com/uc?id=1k7msxU6dS4NPKzE8jxb6AsDx-Kp7MbFn
+From (redirected): https://drive.google.com/uc?id=1k7msxU6dS4NPKzE8jxb6AsDx-Kp7MbFn&confirm=t&uuid=b75ec6a3-e2d9-45ed-a3e6-14ffb83236ac
+To: /content/data/GANGen-Detection/AttGAN.tar.gz
+100%|██████████| 392M/392M [00:09<00:00, 40.1MB/s]
+AttGAN 391994302 bytes
+Downloading...
+From (original): https://drive.google.com/uc?id=1ck_j-056-_L0bc1SJD5qt-ADDSxyGNJc
+From (redirected): https://drive.google.com/uc?id=1ck_j-056-_L0bc1SJD5qt-ADDSxyGNJc&confirm=t&uuid=c3657154-201f-4e05-9dc1-bd60434eb56e
+To: /content/data/GANGen-Detection/BEGAN.tar.gz
+100%|██████████| 108M/108M [00:03<00:00, 33.3MB/s]
+BEGAN 108284939 bytes
+Downloading...
+From (original): https://drive.google.com/uc?id=1L1iS_KdXaShhwNBNf3tGOYhxvRyeypek
+From (redirected): https://drive.google.com/uc?id=1L1iS_KdXaShhwNBNf3tGOYhxvRyeypek&confirm=t&uuid=173cd2ee-dee5-4bcd-9067-c925d48a3229
+To: /content/data/GANGen-Detection/SNGAN.tar.gz
+100%|██████████| 120M/120M [00:03<00:00, 33.7MB/s]
+SNGAN 120495406 bytes
+Downloading...
+From (original): https://drive.google.com/uc?id=1ChS-8jejuR1i7cWV0FoR9wjD0b1nvj30
+From (redirected): https://drive.google.com/uc?id=1ChS-8jejuR1i7cWV0FoR9wjD0b1nvj30&confirm=t&uuid=4195dced-bbfb-4c01-b51c-3efe4d6aaf1c
+To: /content/data/GANGen-Detection/STGAN.tar.gz
+100%|██████████| 119M/119M [00:01<00:00, 83.3MB/s]
+STGAN 118509475 bytes
+   2000 ./AttGAN/0_real
+   2000 ./AttGAN/1_fake
+   2000 ./BEGAN/0_real
+   2000 ./BEGAN/1_fake
+   2000 ./SNGAN/0_real
+   2000 ./SNGAN/1_fake
+   2000 ./STGAN/0_real
+   2000 ./STGAN/1_fake
+
+[6]
+0s
+%cd /content
+!ls /content
+!grep -c "npr_t2_colab t2" /content/npr_t2_colab.py
+!python /content/npr_t2_colab.py --gen AttGAN --extra-gens BEGAN,SNGAN,STGAN
+/content
+data  NPR  sample_data
+grep: /content/npr_t2_colab.py: No such file or directory
+python3: can't open file '/content/npr_t2_colab.py': [Errno 2] No such file or directory
+
+[7]
+0s
+!find /content/data/GANGen-Detection -type f | sed 's|/[^/]*$||' | sort | uniq -c
+   2000 /content/data/GANGen-Detection/AttGAN/0_real
+   2000 /content/data/GANGen-Detection/AttGAN/1_fake
+   2000 /content/data/GANGen-Detection/BEGAN/0_real
+   2000 /content/data/GANGen-Detection/BEGAN/1_fake
+   2000 /content/data/GANGen-Detection/SNGAN/0_real
+   2000 /content/data/GANGen-Detection/SNGAN/1_fake
+   2000 /content/data/GANGen-Detection/STGAN/0_real
+   2000 /content/data/GANGen-Detection/STGAN/1_fake
+
+[9]
+39m
+%cd /content
+!grep -c "npr_t2_colab t2" /content/npr_t2_colab.py
+!python /content/npr_t2_colab.py --gen AttGAN --extra-gens BEGAN,SNGAN,STGAN
+/content
+1
+npr_t2_colab t2 | device cuda
+self-check: ycnpr with full-size colour reproduces the released NPR, max diff 3.05e-04
+self-check: ycdsbn with full-size colour reproduces the released NPR, max diff 3.05e-04
+self-check passed: all arms start from the released NPR
+
+AttGAN: train 3194  test 806  groups shared by train and test: 0
+  AttGAN resampling 0_real: by face id, 1_fake: by face id
+BEGAN: 4000 images, never used in training
+  BEGAN resampling 0_real: by face id, 1_fake: per image
+SNGAN: 4000 images, never used in training
+  SNGAN resampling 0_real: by face id, 1_fake: per image
+STGAN: 4000 images, never used in training
+  STGAN resampling 0_real: by face id, 1_fake: by face id
+  note: BEGAN's real images already carry a JPEG 8x8 grid; read BEGAN rows with care.
+mode single | training images 3194 | crop 224 | seed 0
+
+training: plain
+  epoch 1/6  loss 6.5068  50s
+  epoch 2/6  loss 3.6243  50s
+  epoch 3/6  loss 2.4737  50s
+  epoch 4/6  loss 1.8516  51s
+  epoch 5/6  loss 1.4884  52s
+  epoch 6/6  loss 1.2392  51s
+== plain | AttGAN (seen in training) ==
+  orig     AUC 0.999 [0.998, 1.000]  at 0.5: bal.acc 0.949 (fakes caught 0.995, reals passed 0.902)
+  Q95_420  AUC 0.829 [0.781, 0.874]  at 0.5: bal.acc 0.549 (fakes caught 0.106, reals passed 0.993)
+  Q90_420  AUC 0.826 [0.774, 0.873]  at 0.5: bal.acc 0.548 (fakes caught 0.106, reals passed 0.990)
+  Q70_420  AUC 0.775 [0.712, 0.833]  at 0.5: bal.acc 0.521 (fakes caught 0.049, reals passed 0.993)
+  Q50_420  AUC 0.667 [0.598, 0.732]  at 0.5: bal.acc 0.500 (fakes caught 0.005, reals passed 0.995)
+  Q95_444  AUC 0.993 [0.988, 0.997]  at 0.5: bal.acc 0.783 (fakes caught 0.567, reals passed 1.000)
+  Q75_444  AUC 0.671 [0.598, 0.742]  at 0.5: bal.acc 0.500 (fakes caught 0.000, reals passed 1.000)
+== plain | BEGAN (never seen) ==
+  orig     AUC 1.000 [1.000, 1.000]  at 0.5: bal.acc 0.776 (fakes caught 1.000, reals passed 0.551)
+  Q95_420  AUC 0.473 [0.454, 0.490]  at 0.5: bal.acc 0.453 (fakes caught 0.098, reals passed 0.809)
+  Q90_420  AUC 0.486 [0.467, 0.504]  at 0.5: bal.acc 0.434 (fakes caught 0.104, reals passed 0.763)
+  Q70_420  AUC 0.515 [0.498, 0.533]  at 0.5: bal.acc 0.461 (fakes caught 0.081, reals passed 0.841)
+== plain | SNGAN (never seen) ==
+  orig     AUC 0.924 [0.917, 0.932]  at 0.5: bal.acc 0.811 (fakes caught 0.684, reals passed 0.938)
+  Q95_420  AUC 0.470 [0.452, 0.487]  at 0.5: bal.acc 0.499 (fakes caught 0.013, reals passed 0.984)
+  Q90_420  AUC 0.465 [0.447, 0.482]  at 0.5: bal.acc 0.496 (fakes caught 0.011, reals passed 0.980)
+  Q70_420  AUC 0.481 [0.463, 0.499]  at 0.5: bal.acc 0.494 (fakes caught 0.018, reals passed 0.971)
+== plain | STGAN (never seen) ==
+  orig     AUC 1.000 [0.999, 1.000]  at 0.5: bal.acc 0.988 (fakes caught 0.977, reals passed 0.999)
+  Q95_420  AUC 0.346 [0.317, 0.374]  at 0.5: bal.acc 0.502 (fakes caught 0.051, reals passed 0.953)
+  Q90_420  AUC 0.341 [0.312, 0.371]  at 0.5: bal.acc 0.506 (fakes caught 0.045, reals passed 0.967)
+  Q70_420  AUC 0.370 [0.343, 0.397]  at 0.5: bal.acc 0.500 (fakes caught 0.026, reals passed 0.974)
+
+### Probe (no training): does the plain model rely on the colour detail the decoder invents?
+  normal = as decoded; cellmean = one colour value per 2x2 cell; gray = no colour at all
+  orig     AUC  normal 0.999   cellmean 0.863   gray 0.863
+  Q95_420  AUC  normal 0.829   cellmean 0.864   gray 0.864
+  Q90_420  AUC  normal 0.826   cellmean 0.848   gray 0.848
+  Q95_444  AUC  normal 0.993   cellmean 0.864   gray 0.864
+training: ycnpr
+  epoch 1/6  loss 5.8201  55s
+  epoch 2/6  loss 3.7315  54s
+  epoch 3/6  loss 2.7411  55s
+  epoch 4/6  loss 2.1743  55s
+  epoch 5/6  loss 1.7329  55s
+  epoch 6/6  loss 1.3864  55s
+== ycnpr | AttGAN (seen in training) ==
+  orig     AUC 1.000 [1.000, 1.000]  at 0.5: bal.acc 0.996 (fakes caught 0.993, reals passed 1.000)
+  Q95_420  AUC 0.906 [0.872, 0.936]  at 0.5: bal.acc 0.775 (fakes caught 0.606, reals passed 0.945)
+  Q90_420  AUC 0.878 [0.834, 0.915]  at 0.5: bal.acc 0.792 (fakes caught 0.712, reals passed 0.873)
+  Q70_420  AUC 0.697 [0.638, 0.754]  at 0.5: bal.acc 0.568 (fakes caught 0.212, reals passed 0.925)
+  Q50_420  AUC 0.641 [0.561, 0.711]  at 0.5: bal.acc 0.510 (fakes caught 0.027, reals passed 0.993)
+  Q95_444  AUC 0.992 [0.984, 0.997]  at 0.5: bal.acc 0.688 (fakes caught 0.377, reals passed 1.000)
+  Q75_444  AUC 0.533 [0.444, 0.614]  at 0.5: bal.acc 0.500 (fakes caught 0.000, reals passed 1.000)
+== ycnpr | BEGAN (never seen) ==
+  orig     AUC 0.996 [0.995, 0.997]  at 0.5: bal.acc 0.780 (fakes caught 1.000, reals passed 0.561)
+  Q95_420  AUC 0.653 [0.637, 0.670]  at 0.5: bal.acc 0.615 (fakes caught 0.828, reals passed 0.403)
+  Q90_420  AUC 0.695 [0.680, 0.712]  at 0.5: bal.acc 0.641 (fakes caught 0.846, reals passed 0.436)
+  Q70_420  AUC 0.421 [0.404, 0.439]  at 0.5: bal.acc 0.434 (fakes caught 0.324, reals passed 0.544)
+== ycnpr | SNGAN (never seen) ==
+  orig     AUC 0.844 [0.832, 0.856]  at 0.5: bal.acc 0.735 (fakes caught 0.537, reals passed 0.932)
+  Q95_420  AUC 0.497 [0.478, 0.515]  at 0.5: bal.acc 0.503 (fakes caught 0.168, reals passed 0.839)
+  Q90_420  AUC 0.491 [0.473, 0.510]  at 0.5: bal.acc 0.497 (fakes caught 0.210, reals passed 0.784)
+  Q70_420  AUC 0.506 [0.488, 0.523]  at 0.5: bal.acc 0.503 (fakes caught 0.217, reals passed 0.789)
+== ycnpr | STGAN (never seen) ==
+  orig     AUC 0.986 [0.975, 0.994]  at 0.5: bal.acc 0.939 (fakes caught 0.883, reals passed 0.994)
+  Q95_420  AUC 0.536 [0.503, 0.568]  at 0.5: bal.acc 0.559 (fakes caught 0.268, reals passed 0.851)
+  Q90_420  AUC 0.515 [0.481, 0.547]  at 0.5: bal.acc 0.559 (fakes caught 0.297, reals passed 0.821)
+  Q70_420  AUC 0.459 [0.426, 0.488]  at 0.5: bal.acc 0.515 (fakes caught 0.170, reals passed 0.860)
+
+### ycnpr vs plain on AttGAN
+Rule (fixed before the run): PASS if AUC clearly better than plain on Q95_420 and Q90_420, and AUC not clearly worse on orig.
+  condition AUC plain      ycnpr AUC             dAUC [95% CI]   bal.acc plain    ycnpr bal.acc        d bal.acc [95% CI]
+  orig          0.999          1.000  +0.001 [+0.000, +0.002]           0.949            0.996  +0.048 [+0.033, +0.064]
+  Q95_420       0.829          0.906  +0.077 [+0.034, +0.122]           0.549            0.775  +0.226 [+0.173, +0.282]
+  Q90_420       0.826          0.878  +0.051 [+0.006, +0.094]           0.548            0.792  +0.244 [+0.191, +0.294]
+  Q70_420       0.775          0.697  -0.078 [-0.133, -0.021]           0.521            0.568  +0.048 [+0.018, +0.078]
+  Q50_420       0.667          0.641  -0.026 [-0.096, +0.043]           0.500            0.510  +0.010 [-0.000, +0.023]
+  Q95_444       0.993          0.992  -0.001 [-0.008, +0.005]           0.783            0.688  -0.095 [-0.151, -0.041]
+  Q75_444       0.671          0.533  -0.137 [-0.208, -0.071]           0.500            0.500  +0.000 [+0.000, +0.000]
+VERDICT ycnpr on AttGAN: PASS
+
+### ycnpr vs plain on BEGAN  (information only, no verdict)
+  condition AUC plain      ycnpr AUC             dAUC [95% CI]   bal.acc plain    ycnpr bal.acc        d bal.acc [95% CI]
+  orig          1.000          0.996  -0.004 [-0.005, -0.003]           0.776            0.780  +0.005 [-0.009, +0.018]
+  Q95_420       0.473          0.653  +0.181 [+0.161, +0.202]           0.453            0.615  +0.162 [+0.147, +0.179]
+  Q90_420       0.486          0.695  +0.209 [+0.189, +0.229]           0.434            0.641  +0.207 [+0.192, +0.223]
+  Q70_420       0.515          0.421  -0.094 [-0.113, -0.075]           0.461            0.434  -0.027 [-0.044, -0.012]
+
+### ycnpr vs plain on SNGAN  (information only, no verdict)
+  condition AUC plain      ycnpr AUC             dAUC [95% CI]   bal.acc plain    ycnpr bal.acc        d bal.acc [95% CI]
+  orig          0.924          0.844  -0.080 [-0.090, -0.072]           0.811            0.735  -0.076 [-0.089, -0.064]
+  Q95_420       0.470          0.497  +0.027 [+0.016, +0.038]           0.499            0.503  +0.005 [-0.007, +0.016]
+  Q90_420       0.465          0.491  +0.026 [+0.015, +0.036]           0.496            0.497  +0.002 [-0.011, +0.013]
+  Q70_420       0.481          0.506  +0.026 [+0.012, +0.039]           0.494            0.503  +0.009 [-0.004, +0.021]
+
+### ycnpr vs plain on STGAN  (information only, no verdict)
+  condition AUC plain      ycnpr AUC             dAUC [95% CI]   bal.acc plain    ycnpr bal.acc        d bal.acc [95% CI]
+  orig          1.000          0.986  -0.014 [-0.024, -0.006]           0.988            0.939  -0.049 [-0.060, -0.038]
+  Q95_420       0.346          0.536  +0.190 [+0.167, +0.212]           0.502            0.559  +0.057 [+0.041, +0.075]
+  Q90_420       0.341          0.515  +0.174 [+0.152, +0.195]           0.506            0.559  +0.053 [+0.034, +0.072]
+  Q70_420       0.370          0.459  +0.089 [+0.064, +0.112]           0.500            0.515  +0.015 [+0.000, +0.029]
+training: dsbn
+  epoch 1/6  loss 6.5071  50s
+  epoch 2/6  loss 3.6247  50s
+  epoch 3/6  loss 2.4736  50s
+  epoch 4/6  loss 1.8517  51s
+  epoch 5/6  loss 1.4886  52s
+  epoch 6/6  loss 1.2397  51s
+== dsbn | AttGAN (seen in training) ==
+  orig     AUC 1.000 [1.000, 1.000]  at 0.5: bal.acc 0.989 (fakes caught 0.978, reals passed 1.000)
+  Q95_420  AUC 0.843 [0.804, 0.881]  at 0.5: bal.acc 0.751 (fakes caught 0.719, reals passed 0.782)
+  Q90_420  AUC 0.828 [0.788, 0.869]  at 0.5: bal.acc 0.735 (fakes caught 0.704, reals passed 0.765)
+  Q70_420  AUC 0.751 [0.701, 0.800]  at 0.5: bal.acc 0.680 (fakes caught 0.685, reals passed 0.675)
+  Q50_420  AUC 0.618 [0.556, 0.681]  at 0.5: bal.acc 0.539 (fakes caught 0.305, reals passed 0.772)
+  Q95_444  AUC 0.996 [0.992, 0.998]  at 0.5: bal.acc 0.965 (fakes caught 0.988, reals passed 0.943)
+  Q75_444  AUC 0.647 [0.580, 0.709]  at 0.5: bal.acc 0.510 (fakes caught 0.030, reals passed 0.990)
+== dsbn | BEGAN (never seen) ==
+  orig     AUC 1.000 [1.000, 1.000]  at 0.5: bal.acc 0.942 (fakes caught 1.000, reals passed 0.883)
+  Q95_420  AUC 0.480 [0.464, 0.500]  at 0.5: bal.acc 0.495 (fakes caught 0.712, reals passed 0.278)
+  Q90_420  AUC 0.482 [0.464, 0.499]  at 0.5: bal.acc 0.510 (fakes caught 0.743, reals passed 0.277)
+  Q70_420  AUC 0.500 [0.482, 0.518]  at 0.5: bal.acc 0.511 (fakes caught 0.667, reals passed 0.355)
+== dsbn | SNGAN (never seen) ==
+  orig     AUC 0.912 [0.903, 0.920]  at 0.5: bal.acc 0.698 (fakes caught 0.407, reals passed 0.989)
+  Q95_420  AUC 0.476 [0.458, 0.493]  at 0.5: bal.acc 0.491 (fakes caught 0.163, reals passed 0.820)
+  Q90_420  AUC 0.471 [0.453, 0.488]  at 0.5: bal.acc 0.486 (fakes caught 0.175, reals passed 0.796)
+  Q70_420  AUC 0.485 [0.467, 0.503]  at 0.5: bal.acc 0.487 (fakes caught 0.254, reals passed 0.720)
+== dsbn | STGAN (never seen) ==
+  orig     AUC 0.999 [0.999, 1.000]  at 0.5: bal.acc 0.970 (fakes caught 0.939, reals passed 1.000)
+  Q95_420  AUC 0.456 [0.425, 0.484]  at 0.5: bal.acc 0.508 (fakes caught 0.315, reals passed 0.701)
+  Q90_420  AUC 0.442 [0.411, 0.471]  at 0.5: bal.acc 0.506 (fakes caught 0.288, reals passed 0.723)
+  Q70_420  AUC 0.458 [0.428, 0.486]  at 0.5: bal.acc 0.507 (fakes caught 0.278, reals passed 0.737)
+
+### dsbn vs plain on AttGAN
+Rule (fixed before the run): PASS if balanced accuracy at 0.5 clearly better than plain on Q95_420 and Q90_420, and AUC not clearly worse on Q95_420.
+  condition AUC plain       dsbn AUC             dAUC [95% CI]   bal.acc plain     dsbn bal.acc        d bal.acc [95% CI]
+  orig          0.999          1.000  +0.001 [+0.000, +0.002]           0.949            0.989  +0.040 [+0.022, +0.058]
+  Q95_420       0.829          0.843  +0.014 [-0.021, +0.057]           0.549            0.751  +0.202 [+0.158, +0.250]
+  Q90_420       0.826          0.828  +0.002 [-0.028, +0.044]           0.548            0.735  +0.187 [+0.145, +0.232]
+  Q70_420       0.775          0.751  -0.024 [-0.062, +0.019]           0.521            0.680  +0.159 [+0.118, +0.202]
+  Q50_420       0.667          0.618  -0.049 [-0.096, +0.002]           0.500            0.539  +0.039 [-0.009, +0.092]
+  Q95_444       0.993          0.996  +0.002 [-0.001, +0.007]           0.783            0.965  +0.182 [+0.129, +0.228]
+  Q75_444       0.671          0.647  -0.023 [-0.061, +0.027]           0.500            0.510  +0.010 [+0.001, +0.020]
+VERDICT dsbn on AttGAN: PASS
+
+### dsbn vs plain on BEGAN  (information only, no verdict)
+  condition AUC plain       dsbn AUC             dAUC [95% CI]   bal.acc plain     dsbn bal.acc        d bal.acc [95% CI]
+  orig          1.000          1.000  -0.000 [-0.000, +0.000]           0.776            0.942  +0.166 [+0.156, +0.177]
+  Q95_420       0.473          0.480  +0.008 [-0.004, +0.021]           0.453            0.495  +0.041 [+0.027, +0.058]
+  Q90_420       0.486          0.482  -0.004 [-0.016, +0.008]           0.434            0.510  +0.076 [+0.060, +0.091]
+  Q70_420       0.515          0.500  -0.015 [-0.028, -0.002]           0.461            0.511  +0.050 [+0.033, +0.066]
+
+### dsbn vs plain on SNGAN  (information only, no verdict)
+  condition AUC plain       dsbn AUC             dAUC [95% CI]   bal.acc plain     dsbn bal.acc        d bal.acc [95% CI]
+  orig          0.924          0.912  -0.012 [-0.016, -0.009]           0.811            0.698  -0.113 [-0.125, -0.102]
+  Q95_420       0.470          0.476  +0.006 [-0.000, +0.013]           0.499            0.491  -0.007 [-0.018, +0.003]
+  Q90_420       0.465          0.471  +0.006 [-0.000, +0.012]           0.496            0.486  -0.010 [-0.023, +0.001]
+  Q70_420       0.481          0.485  +0.004 [-0.005, +0.012]           0.494            0.487  -0.008 [-0.022, +0.005]
+
+### dsbn vs plain on STGAN  (information only, no verdict)
+  condition AUC plain       dsbn AUC             dAUC [95% CI]   bal.acc plain     dsbn bal.acc        d bal.acc [95% CI]
+  orig          1.000          0.999  -0.000 [-0.001, -0.000]           0.988            0.970  -0.018 [-0.025, -0.013]
+  Q95_420       0.346          0.456  +0.110 [+0.094, +0.125]           0.502            0.508  +0.006 [-0.010, +0.022]
+  Q90_420       0.341          0.442  +0.100 [+0.086, +0.115]           0.506            0.506  -0.001 [-0.017, +0.016]
+  Q70_420       0.370          0.458  +0.088 [+0.074, +0.102]           0.500            0.507  +0.007 [-0.008, +0.024]
+training: ycdsbn
+  epoch 1/6  loss 5.8201  55s
+  epoch 2/6  loss 3.7315  55s
+  epoch 3/6  loss 2.7411  55s
+  epoch 4/6  loss 2.1743  55s
+  epoch 5/6  loss 1.7329  55s
+  epoch 6/6  loss 1.3863  54s
+== ycdsbn | AttGAN (seen in training) ==
+  orig     AUC 1.000 [1.000, 1.000]  at 0.5: bal.acc 0.980 (fakes caught 0.961, reals passed 1.000)
+  Q95_420  AUC 0.919 [0.889, 0.948]  at 0.5: bal.acc 0.828 (fakes caught 0.759, reals passed 0.897)
+  Q90_420  AUC 0.882 [0.843, 0.919]  at 0.5: bal.acc 0.791 (fakes caught 0.825, reals passed 0.757)
+  Q70_420  AUC 0.666 [0.606, 0.724]  at 0.5: bal.acc 0.600 (fakes caught 0.379, reals passed 0.820)
+  Q50_420  AUC 0.606 [0.525, 0.681]  at 0.5: bal.acc 0.520 (fakes caught 0.059, reals passed 0.980)
+  Q95_444  AUC 0.995 [0.988, 0.998]  at 0.5: bal.acc 0.740 (fakes caught 0.480, reals passed 1.000)
+  Q75_444  AUC 0.495 [0.409, 0.571]  at 0.5: bal.acc 0.500 (fakes caught 0.000, reals passed 1.000)
+== ycdsbn | BEGAN (never seen) ==
+  orig     AUC 0.985 [0.982, 0.988]  at 0.5: bal.acc 0.837 (fakes caught 0.998, reals passed 0.676)
+  Q95_420  AUC 0.650 [0.633, 0.666]  at 0.5: bal.acc 0.599 (fakes caught 0.896, reals passed 0.301)
+  Q90_420  AUC 0.676 [0.660, 0.692]  at 0.5: bal.acc 0.609 (fakes caught 0.904, reals passed 0.313)
+  Q70_420  AUC 0.384 [0.367, 0.401]  at 0.5: bal.acc 0.418 (fakes caught 0.421, reals passed 0.415)
+== ycdsbn | SNGAN (never seen) ==
+  orig     AUC 0.817 [0.805, 0.831]  at 0.5: bal.acc 0.683 (fakes caught 0.408, reals passed 0.958)
+  Q95_420  AUC 0.501 [0.483, 0.519]  at 0.5: bal.acc 0.502 (fakes caught 0.249, reals passed 0.754)
+  Q90_420  AUC 0.496 [0.479, 0.515]  at 0.5: bal.acc 0.501 (fakes caught 0.322, reals passed 0.680)
+  Q70_420  AUC 0.510 [0.493, 0.527]  at 0.5: bal.acc 0.509 (fakes caught 0.346, reals passed 0.672)
+== ycdsbn | STGAN (never seen) ==
+  orig     AUC 0.978 [0.965, 0.987]  at 0.5: bal.acc 0.903 (fakes caught 0.810, reals passed 0.995)
+  Q95_420  AUC 0.588 [0.556, 0.618]  at 0.5: bal.acc 0.582 (fakes caught 0.391, reals passed 0.772)
+  Q90_420  AUC 0.560 [0.527, 0.591]  at 0.5: bal.acc 0.575 (fakes caught 0.431, reals passed 0.719)
+  Q70_420  AUC 0.500 [0.467, 0.528]  at 0.5: bal.acc 0.527 (fakes caught 0.309, reals passed 0.745)
+
+### ycdsbn vs plain on AttGAN
+Rule (fixed before the run): PASS if AUC clearly better than plain on Q95_420 and Q90_420, and AUC not clearly worse on orig, AND balanced accuracy at 0.5 clearly better on Q95_420 and Q90_420.
+  condition AUC plain     ycdsbn AUC             dAUC [95% CI]   bal.acc plain   ycdsbn bal.acc        d bal.acc [95% CI]
+  orig          0.999          1.000  +0.001 [+0.000, +0.002]           0.949            0.980  +0.032 [+0.004, +0.054]
+  Q95_420       0.829          0.919  +0.090 [+0.040, +0.145]           0.549            0.828  +0.279 [+0.232, +0.327]
+  Q90_420       0.826          0.882  +0.056 [+0.006, +0.105]           0.548            0.791  +0.243 [+0.194, +0.288]
+  Q70_420       0.775          0.666  -0.109 [-0.171, -0.037]           0.521            0.600  +0.079 [+0.038, +0.117]
+  Q50_420       0.667          0.606  -0.061 [-0.141, +0.021]           0.500            0.520  +0.020 [+0.006, +0.034]
+  Q95_444       0.993          0.995  +0.001 [-0.004, +0.007]           0.783            0.740  -0.043 [-0.100, +0.017]
+  Q75_444       0.671          0.495  -0.175 [-0.248, -0.103]           0.500            0.500  +0.000 [+0.000, +0.000]
+VERDICT ycdsbn on AttGAN: PASS
+
+### ycdsbn vs plain on BEGAN  (information only, no verdict)
+  condition AUC plain     ycdsbn AUC             dAUC [95% CI]   bal.acc plain   ycdsbn bal.acc        d bal.acc [95% CI]
+  orig          1.000          0.985  -0.015 [-0.018, -0.012]           0.776            0.837  +0.062 [+0.048, +0.075]
+  Q95_420       0.473          0.650  +0.177 [+0.156, +0.199]           0.453            0.599  +0.145 [+0.131, +0.160]
+  Q90_420       0.486          0.676  +0.189 [+0.169, +0.211]           0.434            0.609  +0.175 [+0.160, +0.191]
+  Q70_420       0.515          0.384  -0.131 [-0.151, -0.110]           0.461            0.418  -0.043 [-0.058, -0.026]
+
+### ycdsbn vs plain on SNGAN  (information only, no verdict)
+  condition AUC plain     ycdsbn AUC             dAUC [95% CI]   bal.acc plain   ycdsbn bal.acc        d bal.acc [95% CI]
+  orig          0.924          0.817  -0.107 [-0.118, -0.097]           0.811            0.683  -0.128 [-0.142, -0.117]
+  Q95_420       0.470          0.501  +0.032 [+0.020, +0.044]           0.499            0.502  +0.003 [-0.011, +0.016]
+  Q90_420       0.465          0.496  +0.031 [+0.019, +0.043]           0.496            0.501  +0.005 [-0.009, +0.019]
+  Q70_420       0.481          0.510  +0.030 [+0.014, +0.045]           0.494            0.509  +0.015 [-0.001, +0.028]
+
+### ycdsbn vs plain on STGAN  (information only, no verdict)
+  condition AUC plain     ycdsbn AUC             dAUC [95% CI]   bal.acc plain   ycdsbn bal.acc        d bal.acc [95% CI]
+  orig          1.000          0.978  -0.022 [-0.034, -0.013]           0.988            0.903  -0.085 [-0.099, -0.071]
+  Q95_420       0.346          0.588  +0.242 [+0.217, +0.268]           0.502            0.582  +0.080 [+0.061, +0.098]
+  Q90_420       0.341          0.560  +0.219 [+0.196, +0.242]           0.506            0.575  +0.069 [+0.048, +0.088]
+  Q70_420       0.370          0.500  +0.130 [+0.103, +0.155]           0.500            0.527  +0.027 [+0.007, +0.046]
+
+### Summary
+  mode single, trained on AttGAN, seed 0
+  anchor: plain AUC on AttGAN at Q95_420 = 0.829 (t1 runs: 0.829, 0.829, 0.829)
+  generator  role            plain    ycnpr     dsbn   ycdsbn   (AUC at Q95_420)
+  AttGAN     seen            0.829    0.906    0.843    0.919
+  BEGAN      never seen      0.473    0.653    0.480    0.650
+  SNGAN      never seen      0.470    0.497    0.476    0.501
+  STGAN      never seen      0.346    0.536    0.456    0.588
+  VERDICT ycnpr     on AttGAN   PASS
+  VERDICT dsbn      on AttGAN   PASS
+  VERDICT ycdsbn    on AttGAN   PASS
+
+wrote /content/npr_t2_single_AttGAN_seed0.csv
